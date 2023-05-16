@@ -18,23 +18,24 @@ public class UserRepositoryImpl implements UserRepository {
     public List<UserDTO> getAll() {
         return userHashMap.values()
                 .stream()
-                .map(UserMapper::UserToDto)
+                .map(UserMapper::userToDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public UserDTO get(long userId) {
         Optional<User> userOpt = Optional.ofNullable(userHashMap.get(userId));
-        if(userOpt.isPresent()){
-            return UserMapper.UserToDto(userOpt.get());
+        if (userOpt.isPresent()) {
+            return UserMapper.userToDto(userOpt.get());
         }
         throw new NoSuchUserException(String.format("Пользователя с ID=%s не существует", userId));
     }
+
     @Override
     public UserDTO create(User user) {
         user.setId(id++);
         userHashMap.put(user.getId(), user);
-        return UserMapper.UserToDto(user);
+        return UserMapper.userToDto(user);
     }
 
     @Override
@@ -45,7 +46,7 @@ public class UserRepositoryImpl implements UserRepository {
             oldUser.setName(user.getName() == null ? oldUser.getName() : user.getName());
             oldUser.setEmail(user.getEmail() == null ? oldUser.getEmail() : user.getEmail());
             userHashMap.replace(userId, oldUser);
-            return UserMapper.UserToDto(oldUser);
+            return UserMapper.userToDto(oldUser);
         }
         throw new NoSuchUserException(String.format("Неудалось обновить пользователя. " +
                 "Пользователя с ID=%s не существует.", user.getId()));
@@ -55,7 +56,7 @@ public class UserRepositoryImpl implements UserRepository {
     public UserDTO delete(long userId) {
         Optional<User> userOptional = Optional.ofNullable(userHashMap.remove(userId));
         if (userOptional.isPresent()) {
-            return UserMapper.UserToDto(userOptional.get());
+            return UserMapper.userToDto(userOptional.get());
         }
         throw new NoSuchUserException(String.format("Неудалось удалить пользователя. " +
                 "Пользователя с ID=%s не существует.", userId));

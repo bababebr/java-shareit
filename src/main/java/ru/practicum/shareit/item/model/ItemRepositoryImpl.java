@@ -21,7 +21,7 @@ public class ItemRepositoryImpl implements ItemRepository {
         item.setOwnerId(ownerId);
         item.setId(getId());
         items.put(item.getId(), item);
-        return ItemMapper.ItemToDto(item);
+        return ItemMapper.itemToDto(item);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class ItemRepositoryImpl implements ItemRepository {
             if (item.getAvailable() != null) {
                 oldItem.setAvailable(item.getAvailable());
             }
-            return ItemMapper.ItemToDto(oldItem);
+            return ItemMapper.itemToDto(oldItem);
         }
         throw new NoSuchItemException(String.format("Unable to update Item. " +
                 "There is no Item with ID=%s.", item.getId()));
@@ -46,7 +46,7 @@ public class ItemRepositoryImpl implements ItemRepository {
     @Override
     public ItemDto getItem(long itemId) {
         try {
-            return ItemMapper.ItemToDto(items.get(itemId));
+            return ItemMapper.itemToDto(items.get(itemId));
         } catch (NullPointerException e) {
             throw new NoSuchItemException(String.format("There is no Item with ID=%s.", itemId));
         }
@@ -57,7 +57,7 @@ public class ItemRepositoryImpl implements ItemRepository {
         return items.values()
                 .stream()
                 .filter(value -> value.getOwnerId() == ownerId)
-                .map(ItemMapper::ItemToDto)
+                .map(ItemMapper::itemToDto)
                 .collect(Collectors.toList());
     }
 
@@ -77,7 +77,7 @@ public class ItemRepositoryImpl implements ItemRepository {
             if (keyWords.stream()
                     .allMatch(kw -> item.getName().toLowerCase().contains(kw) ||
                             item.getDescription().toLowerCase().contains(kw))) {
-                searchResult.add(ItemMapper.ItemToDto(item));
+                searchResult.add(ItemMapper.itemToDto(item));
             }
         }
 
