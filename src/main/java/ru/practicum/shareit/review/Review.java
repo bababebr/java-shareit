@@ -1,17 +1,16 @@
-package ru.practicum.shareit.item.dto;
+package ru.practicum.shareit.review;
 
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-
 @Data
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor(staticName = "create")
-public class ItemDto {
+public class Review {
     long id;
-    String name;
-    String description;
-    boolean available;
+    long userId;
+    long itemId;
+    String reviewText;
 }
