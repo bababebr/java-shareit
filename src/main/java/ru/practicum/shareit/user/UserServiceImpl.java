@@ -27,7 +27,7 @@ class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO create(User user) {
-        if (!duplicationCheck(user)) {
+        if (isSameEmailExist(user)) {
             return repository.create(user);
         }
         throw new DuplicationException("Пользователь с таким e-mail уже существует.");
@@ -36,7 +36,7 @@ class UserServiceImpl implements UserService {
     @Override
     public UserDTO update(User user, long userId) {
         user.setId(userId);
-        if (!duplicationCheck(user)) {
+        if (isSameEmailExist(user)) {
             return repository.update(user, userId);
         }
         throw new DuplicationException("Пользователь с таким e-mail уже существует.");
@@ -47,8 +47,8 @@ class UserServiceImpl implements UserService {
         return repository.delete(userId);
     }
 
-    private boolean duplicationCheck(User user) {
+    private boolean isSameEmailExist(User user) {
         return repository.getAll().stream()
-                .anyMatch(u -> u.getEmail().equals(user.getEmail()) && u.getId() != user.getId());
+                .noneMatch(u -> u.getEmail().equals(user.getEmail()) && !u.getId().equals(user.getId()));
     }
 }
