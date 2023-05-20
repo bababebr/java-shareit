@@ -16,7 +16,7 @@ public final class ItemMapper {
                 item.getAvailable());
     }
 
-    public static Item DtoToItem(ItemDto itemDto, User owner) {
+    public static Item dtoToItem(ItemDto itemDto, User owner) {
         return Item.create(itemDto.getId(),
                 owner,
                 itemDto.getAvailable(),

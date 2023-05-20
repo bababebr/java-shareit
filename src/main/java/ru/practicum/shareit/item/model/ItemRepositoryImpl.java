@@ -18,7 +18,7 @@ public class ItemRepositoryImpl implements ItemRepository {
 
     @Override
     public ItemDto addItem(ItemDto itemDto, User owner) {
-        Item item = ItemMapper.DtoToItem(itemDto, owner);
+        Item item = ItemMapper.dtoToItem(itemDto, owner);
         item.setId(getId());
         items.put(item.getId(), item);
 
@@ -37,7 +37,7 @@ public class ItemRepositoryImpl implements ItemRepository {
     @Override
     public ItemDto updateItem(ItemDto itemDto, User owner, long itemId) {
         if (items.get(itemId) != null && items.get(itemId).getOwner().getId().equals(owner.getId())) {
-            Item item = ItemMapper.DtoToItem(itemDto, owner);
+            Item item = ItemMapper.dtoToItem(itemDto, owner);
             Item oldItem = items.get(itemId);
             if (item.getDescription() != null) {
                 oldItem.setDescription(item.getDescription());
