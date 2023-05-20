@@ -1,24 +1,24 @@
 package ru.practicum.shareit.user;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 
 @Data
 @AllArgsConstructor(staticName = "create")
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserDTO {
+public class UserDto {
+    @EqualsAndHashCode.Exclude
     @Positive
     Long id;
-    @Email
-    String email;
-    @NotEmpty
+    @NotEmpty(message = "Name cannot be empty.")
     String name;
+    @Email(message = "Email is incorrect.")
+    @NotNull(message = "Name cannot be null.")
+    String email;
 }

@@ -11,12 +11,6 @@ import javax.validation.ValidationException;
 public class ExceptionsHandler {
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorResponse authorisationError(final AccessDeniedException e) {
-        return new ErrorResponse("Authorisation exception: ", e.getMessage());
-    }
-
-    @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse validationException(final ValidationException e) {
         return new ErrorResponse("Validation Exception: ", e.getMessage());
@@ -30,13 +24,7 @@ public class ExceptionsHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse itemNotFoundException(final NoSuchItemException e) {
-        return new ErrorResponse("Item Exception: ", e.getMessage());
-    }
-
-    @ExceptionHandler()
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse userNotFoundException(final NoSuchUserException e) {
-        return new ErrorResponse("User exception: ", e.getMessage());
+    public ErrorResponse itemNotFoundException(final NoSuchObjectException e) {
+        return new ErrorResponse("Object Exception: ", e.getMessage());
     }
 }

@@ -2,9 +2,9 @@ package ru.practicum.shareit.item.model;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.NoSuchUserException;
+import ru.practicum.shareit.exception.NoSuchObjectException;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.user.UserRepositoryImpl;
+import ru.practicum.shareit.user.UserRepository;
 
 import java.util.List;
 
@@ -12,24 +12,24 @@ import java.util.List;
 @RequiredArgsConstructor
 class ItemServiceImpl implements ItemService {
 
+
     private final ItemRepository repository;
-    private final UserRepositoryImpl userRepository;
+    private final UserRepository userRepository;
 
     @Override
-    public ItemDto addItem(Item item, long ownerId) {
+    public ItemDto addItem(ItemDto itemDto, long ownerId) {
         if (userRepository.isUserExist(ownerId)) {
-
-            return repository.addItem(item, ownerId);
+            return repository.addItem(itemDto, userRepository.getUser(ownerId));
         }
-        throw new NoSuchUserException(String.format("There is no User with ID=%s.", ownerId));
+        throw new NoSuchObjectException(String.format("There is no User with ID=%s.", ownerId));
     }
 
     @Override
-    public ItemDto updateItem(Item item, long ownerId, long itemId) {
+    public ItemDto updateItem(ItemDto itemDto, long ownerId, long itemId) {
         if (userRepository.isUserExist(ownerId)) {
-            return repository.updateItem(item, ownerId, itemId);
+            return repository.updateItem(itemDto, userRepository.getUser(ownerId), itemId);
         }
-        throw new NoSuchUserException(String.format("There is no User with ID=%s.", ownerId));
+        throw new NoSuchObjectException(String.format("There is no User with ID=%s.", ownerId));
     }
 
     @Override
@@ -42,7 +42,7 @@ class ItemServiceImpl implements ItemService {
         if (userRepository.isUserExist(ownerId)) {
             return repository.getUsersOwnItems(ownerId);
         }
-        throw new NoSuchUserException(String.format("There is no User with ID=%s.", ownerId));
+        throw new NoSuchObjectException(String.format("There is no User with ID=%s.", ownerId));
     }
 
     @Override

@@ -1,21 +1,23 @@
 package ru.practicum.shareit.user;
 
 import org.springframework.stereotype.Repository;
-import ru.practicum.shareit.exception.NoSuchUserException;
+import ru.practicum.shareit.exception.NoSuchObjectException;
 
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
+@Resource(name = "memoryUserRepository")
 public class UserRepositoryImpl implements UserRepository {
 
     private final HashMap<Long, User> userHashMap = new HashMap<>();
     private long id = 1;
 
     @Override
-    public List<UserDTO> getAll() {
+    public List<UserDto> getAll() {
         return userHashMap.values()
                 .stream()
                 .map(UserMapper::userToDto)
@@ -23,42 +25,52 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public UserDTO get(long userId) {
+    public UserDto getUserDto(long userId) {
         Optional<User> userOpt = Optional.ofNullable(userHashMap.get(userId));
         if (userOpt.isPresent()) {
             return UserMapper.userToDto(userOpt.get());
         }
-        throw new NoSuchUserException(String.format("Пользователя с ID=%s не существует", userId));
+        throw new NoSuchObjectException(String.format("Пользователя с ID=%s не существует", userId));
     }
 
     @Override
-    public UserDTO create(User user) {
-        user.setId(id++);
-        userHashMap.put(user.getId(), user);
-        return UserMapper.userToDto(user);
+    public User getUser(long userId) {
+        Optional<User> userOpt = Optional.ofNullable(userHashMap.get(userId));
+        if (userOpt.isPresent()) {
+            return userOpt.get();
+        }
+        throw new NoSuchObjectException(String.format("Пользователя с ID=%s не существует", userId));
     }
 
     @Override
-    public UserDTO update(User user, long userId) {
+    public UserDto create(UserDto userDto) {
+        userDto.setId(id++);
+        User user = UserMapper.userDtoToUser(userDto);
+        userHashMap.put(userDto.getId(), user);
+        return userDto;
+    }
+
+    @Override
+    public UserDto update(UserDto userDto, long userId) {
 
         if (userHashMap.containsKey(userId)) {
             User oldUser = userHashMap.get(userId);
-            oldUser.setName(user.getName() == null ? oldUser.getName() : user.getName());
-            oldUser.setEmail(user.getEmail() == null ? oldUser.getEmail() : user.getEmail());
+            oldUser.setName(userDto.getName() == null ? oldUser.getName() : userDto.getName());
+            oldUser.setEmail(userDto.getEmail() == null ? oldUser.getEmail() : userDto.getEmail());
             userHashMap.replace(userId, oldUser);
             return UserMapper.userToDto(oldUser);
         }
-        throw new NoSuchUserException(String.format("Неудалось обновить пользователя. " +
-                "Пользователя с ID=%s не существует.", user.getId()));
+        throw new NoSuchObjectException(String.format("Неудалось обновить пользователя. " +
+                "Пользователя с ID=%s не существует.", userDto.getId()));
     }
 
     @Override
-    public UserDTO delete(long userId) {
+    public UserDto delete(long userId) {
         Optional<User> userOptional = Optional.ofNullable(userHashMap.remove(userId));
         if (userOptional.isPresent()) {
             return UserMapper.userToDto(userOptional.get());
         }
-        throw new NoSuchUserException(String.format("Неудалось удалить пользователя. " +
+        throw new NoSuchObjectException(String.format("Неудалось удалить пользователя. " +
                 "Пользователя с ID=%s не существует.", userId));
     }
 

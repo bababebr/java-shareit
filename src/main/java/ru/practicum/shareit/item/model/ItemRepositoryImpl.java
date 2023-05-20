@@ -1,32 +1,43 @@
 package ru.practicum.shareit.item.model;
 
 import org.springframework.stereotype.Repository;
-import ru.practicum.shareit.exception.NoSuchItemException;
+import ru.practicum.shareit.exception.NoSuchObjectException;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.user.User;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import javax.annotation.Resource;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Repository
+@Resource(name = "memoryItemRepository")
 public class ItemRepositoryImpl implements ItemRepository {
     private final Map<Long, Item> items = new HashMap<>();
+    private final Map<Long, ArrayList<Long>> userOwnItems = new HashMap<>();
 
     @Override
-    public ItemDto addItem(Item item, long ownerId) {
-        item.setOwnerId(ownerId);
+    public ItemDto addItem(ItemDto itemDto, User owner) {
+        Item item = ItemMapper.DtoToItem(itemDto, owner);
         item.setId(getId());
         items.put(item.getId(), item);
+
+        ArrayList<Long> ownItemsId = userOwnItems.get(owner.getId());
+        if (ownItemsId == null) {
+            ownItemsId = new ArrayList<>();
+            ownItemsId.add(item.getId());
+            userOwnItems.put(owner.getId(), ownItemsId);
+        } else {
+            userOwnItems.get(owner.getId()).add(item.getId());
+        }
         return ItemMapper.itemToDto(item);
     }
 
+
     @Override
-    public ItemDto updateItem(Item item, long ownerId, long itemId) {
-        if (items.containsKey(itemId) && items.get(itemId).getOwnerId() == ownerId) {
+    public ItemDto updateItem(ItemDto itemDto, User owner, long itemId) {
+        if (items.get(itemId) != null && items.get(itemId).getOwner().getId().equals(owner.getId())) {
+            Item item = ItemMapper.DtoToItem(itemDto, owner);
             Item oldItem = items.get(itemId);
             if (item.getDescription() != null) {
                 oldItem.setDescription(item.getDescription());
@@ -39,26 +50,29 @@ public class ItemRepositoryImpl implements ItemRepository {
             }
             return ItemMapper.itemToDto(oldItem);
         }
-        throw new NoSuchItemException(String.format("Unable to update Item. " +
-                "There is no Item with ID=%s.", item.getId()));
+        throw new NoSuchObjectException(String.format("Unable to update Item. " +
+                "There is no Item with ID=%s.", itemId));
     }
 
     @Override
     public ItemDto getItem(long itemId) {
-        try {
-            return ItemMapper.itemToDto(items.get(itemId));
-        } catch (NullPointerException e) {
-            throw new NoSuchItemException(String.format("There is no Item with ID=%s.", itemId));
+        Optional<Item> itemOpt = Optional.ofNullable(items.get(itemId));
+        if (itemOpt.isPresent()) {
+            return ItemMapper.itemToDto(itemOpt.get());
         }
+        throw new NoSuchObjectException(String.format("There is no Item with ID=%s.", itemId));
     }
 
     @Override
     public List<ItemDto> getUsersOwnItems(long ownerId) {
-        return items.values()
-                .stream()
-                .filter(value -> value.getOwnerId() == ownerId)
-                .map(ItemMapper::itemToDto)
-                .collect(Collectors.toList());
+        ArrayList<Long> itemsIdList = userOwnItems.get(ownerId);
+        if (itemsIdList == null) {
+            return new ArrayList<>();
+        } else {
+            return userOwnItems.get(ownerId).stream()
+                    .map(itemId -> ItemMapper.itemToDto(items.get(itemId)))
+                    .collect(Collectors.toList());
+        }
     }
 
     @Override

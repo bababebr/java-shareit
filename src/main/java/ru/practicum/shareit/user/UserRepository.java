@@ -2,15 +2,18 @@ package ru.practicum.shareit.user;
 
 import java.util.List;
 
-interface UserRepository {
-    List<UserDTO> getAll();
+public interface UserRepository {
+    List<UserDto> getAll();
 
-    UserDTO get(long userId);
+    UserDto getUserDto(long userId);
 
-    UserDTO create(User user);
+    User getUser(long userId);
 
-    UserDTO update(User user, long userId);
+    UserDto create(UserDto user);
 
-    UserDTO delete(long userId);
+    UserDto update(UserDto user, long userId);
 
+    UserDto delete(long userId);
+
+    boolean isUserExist(long userId);
 }
