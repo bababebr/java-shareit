@@ -12,7 +12,6 @@ import java.util.List;
 @RequiredArgsConstructor
 class ItemServiceImpl implements ItemService {
 
-
     private final ItemRepository repository;
     private final UserRepository userRepository;
 

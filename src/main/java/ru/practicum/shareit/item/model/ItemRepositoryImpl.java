@@ -5,13 +5,11 @@ import ru.practicum.shareit.exception.NoSuchObjectException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.User;
 
-import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Repository
-@Resource(name = "memoryItemRepository")
 public class ItemRepositoryImpl implements ItemRepository {
     private final Map<Long, Item> items = new HashMap<>();
     private final Map<Long, ArrayList<Long>> userOwnItems = new HashMap<>();
@@ -68,11 +66,10 @@ public class ItemRepositoryImpl implements ItemRepository {
         ArrayList<Long> itemsIdList = userOwnItems.get(ownerId);
         if (itemsIdList == null) {
             return new ArrayList<>();
-        } else {
-            return userOwnItems.get(ownerId).stream()
-                    .map(itemId -> ItemMapper.itemToDto(items.get(itemId)))
-                    .collect(Collectors.toList());
         }
+        return userOwnItems.get(ownerId).stream()
+                .map(itemId -> ItemMapper.itemToDto(items.get(itemId)))
+                .collect(Collectors.toList());
     }
 
     @Override

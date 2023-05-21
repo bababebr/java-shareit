@@ -16,5 +16,4 @@ public interface ItemRepository {
     List<ItemDto> getUsersOwnItems(long ownerId);
 
     List<ItemDto> searchItemByDescription(String searchText);
-
 }
