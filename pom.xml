@@ -38,6 +38,7 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-configuration-processor</artifactId>
+			<version>2.7.8</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -53,6 +54,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.puppycrawl.tools</groupId>
+			<artifactId>checkstyle</artifactId>
+			<version>10.3</version>
 		</dependency>
 	</dependencies>
 
@@ -90,6 +96,11 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>3.7.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-checkstyle-plugin</artifactId>
 					<version>3.1.2</version>
 					<configuration>
@@ -106,13 +117,6 @@
 							<phase>compile</phase>
 						</execution>
 					</executions>
-					<dependencies>
-						<dependency>
-							<groupId>com.puppycrawl.tools</groupId>
-							<artifactId>checkstyle</artifactId>
-							<version>10.3</version>
-						</dependency>
-					</dependencies>
 				</plugin>
 				<plugin>
 					<groupId>com.github.spotbugs</groupId>
