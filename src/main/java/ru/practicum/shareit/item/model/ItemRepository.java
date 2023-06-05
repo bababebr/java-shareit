@@ -1,19 +1,21 @@
 package ru.practicum.shareit.item.model;
 
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.user.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-public interface ItemRepository {
+@Repository
+public interface ItemRepository extends JpaRepository<Item, Long>, QuerydslPredicateExecutor<Item> {
 
-    ItemDto addItem(ItemDto item, User owner);
+    @Query("select it from Item as it join it.owner as o where o.id =?1")
+    List<Item> findItemsByUserId(long userId);
 
-    ItemDto updateItem(ItemDto item, User owner, long itemId);
 
-    ItemDto getItem(long itemId);
+    @Query("select it from Item as it where it.name like concat('%',?1,'%') " +
+            "or it.description like concat('%',?1,'%') ")
+    List<Item> findItemByNameAndDescription(String searchText);
 
-    List<ItemDto> getUsersOwnItems(long ownerId);
-
-    List<ItemDto> searchItemByDescription(String searchText);
 }

@@ -1,19 +1,10 @@
 package ru.practicum.shareit.user;
 
-import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.stereotype.Repository;
 
-public interface UserRepository {
-    List<UserDto> getAll();
+@Repository
+public interface UserRepository extends JpaRepository<User, Long>, QuerydslPredicateExecutor<User> {
 
-    UserDto getUserDto(long userId);
-
-    User getUser(long userId);
-
-    UserDto create(UserDto user);
-
-    UserDto update(UserDto user, long userId);
-
-    UserDto delete(long userId);
-
-    boolean isUserExist(long userId);
 }
