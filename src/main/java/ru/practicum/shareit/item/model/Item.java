@@ -22,7 +22,8 @@ public class Item {
     Long id;
     @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
-    User owner;
+    @EqualsAndHashCode.Exclude
+    User user;
     @Column(name = "isAvailable")
     Boolean available;
     @Column(name = "description")

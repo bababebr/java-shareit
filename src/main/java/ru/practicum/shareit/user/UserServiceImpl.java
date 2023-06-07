@@ -35,7 +35,15 @@ class UserServiceImpl implements UserService {
 
     @Override
     public UserDto update(UserDto userDto, long userId) {
-        return create((userDto));
+        User user = repository.findById(userId).get();
+        if (userDto.getEmail() != null) {
+            user.setEmail(userDto.getEmail());
+        }
+        if (userDto.getName() != null) {
+            user.setName(userDto.getName());
+        }
+        repository.save(user);
+        return UserMapper.userToDto(user);
     }
 
     @Override

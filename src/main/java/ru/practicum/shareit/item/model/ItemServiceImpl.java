@@ -8,6 +8,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,8 +29,24 @@ class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto updateItem(ItemDto itemDto, long ownerId, long itemId) {
+
         if (repository.existsById(itemId)) {
-            return addItem(itemDto, ownerId);
+            Item oldItem = repository.findById(itemId).get();
+            if (oldItem.getUser().getId() != ownerId) {
+                throw new NoSuchObjectException(String.format("User ID= %s doesn't have Item with ID=%s",
+                        ownerId, itemId));
+            }
+            if (itemDto.getName() != null) {
+                oldItem.setName(itemDto.getName());
+            }
+            if (itemDto.getAvailable() != null) {
+                oldItem.setAvailable(itemDto.getAvailable());
+            }
+            if (itemDto.getDescription() != null) {
+                oldItem.setDescription(itemDto.getDescription());
+            }
+            repository.save(oldItem);
+            return ItemMapper.itemToDto(oldItem);
         } else {
             throw new NoSuchObjectException(String.format("There is no Item with ID=%s.", itemId));
         }
@@ -49,6 +66,9 @@ class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> searchItemByDescription(String searchText) {
+        if(searchText.isBlank()){
+            return new ArrayList<>();
+        }
         List<Item> items = repository.findItemByNameAndDescription(searchText);
         return items.stream().map(ItemMapper::itemToDto).collect(Collectors.toList());
     }
