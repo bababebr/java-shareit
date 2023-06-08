@@ -11,7 +11,7 @@ public interface BookingService {
 
     BookingDto update(Long bookerId, Long bookingId, BookingDto bookingDto, BookingStatus state);
 
-    List<BookingDto> get(Long bookingId, Long bookerId);
+    BookingDto get(Long bookingId, Long userId);
 
     BookingDto approve(long bookerId, long bookingId, boolean approved);
 }

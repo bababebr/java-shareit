@@ -10,6 +10,7 @@ import ru.practicum.shareit.item.model.ItemRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
+import javax.xml.bind.ValidationException;
 import java.util.List;
 
 @Service
@@ -48,7 +49,12 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> get(Long bookingId, Long bookerId) {
+    public BookingDto get(Long bookingId, Long userId) {
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
+                new NoSuchObjectException("Booking not found"));
+        if(booking.getBooker().getId() == userId || booking.getOwner().getId() == userId) {
+            return BookingMapper.bookingToBookingDto(booking);
+        }
         return null;
     }
 
@@ -66,10 +72,8 @@ public class BookingServiceImpl implements BookingService {
                 booking.setState(BookingStatus.REJECTED);
             }
         }
-
         bookingRepository.save(booking);
         itemRepository.save(item);
-
         return BookingMapper.bookingToBookingDto(booking);
     }
 }
