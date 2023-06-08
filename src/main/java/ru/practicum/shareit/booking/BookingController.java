@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/bookings")
@@ -31,6 +32,17 @@ public class BookingController {
     public BookingDto get(@RequestHeader("X-Sharer-User-Id") Long userId,
                           @PathVariable long bookingId) {
         return bookingService.get(bookingId, userId);
+    }
+
+    @GetMapping
+    public List<BookingDto> get(@RequestHeader("X-Sharer-User-Id") Long userId) {
+        return bookingService.getAllUsersBooking(userId);
+    }
+
+    @GetMapping("/owner")
+    public List<BookingDto> get(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                @PathVariable(required = false)  String state) {
+        return bookingService.getAllOwnersBooking(userId, state);
     }
 
 

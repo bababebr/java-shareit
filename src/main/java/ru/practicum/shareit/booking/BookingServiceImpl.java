@@ -10,8 +10,6 @@ import ru.practicum.shareit.item.model.ItemRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
-import javax.xml.bind.ValidationException;
-import java.time.Period;
 import java.util.List;
 
 @Service
@@ -87,5 +85,22 @@ public class BookingServiceImpl implements BookingService {
         bookingRepository.save(booking);
         itemRepository.save(item);
         return BookingMapper.bookingToBookingDto(booking);
+    }
+
+    @Override
+    public List<BookingDto> getAllUsersBooking(Long userId) {
+        userRepository.findById(userId).orElseThrow(()
+                -> new NoSuchObjectException(String.format("User with ID=%s not found", userId)));
+        return BookingMapper.bookingDtos(bookingRepository.findBookingsByBooker_Id(userId));
+    }
+
+    @Override
+    public List<BookingDto> getAllOwnersBooking(Long userId, String state) {
+        userRepository.findById(userId).orElseThrow(()
+                -> new NoSuchObjectException(String.format("User with ID=%s not found", userId)));
+        if(state == null) {
+            state = "ALL";
+        }
+        return BookingMapper.bookingDtos(bookingRepository.findBookingsByOwner_IdAndState(userId, state));
     }
 }
