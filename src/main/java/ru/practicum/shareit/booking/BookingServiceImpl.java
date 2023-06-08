@@ -32,11 +32,12 @@ public class BookingServiceImpl implements BookingService {
         User owner = item.getUser();
         User booker = userRepository.findById(bookerId).orElseThrow(() ->
                 new NoSuchObjectException(String.format("User with ID=%s not found", bookerId)));
-        bookingDto.setState(BookingStatus.WAITING);
-        bookingDto.setBookerId(bookerId);
+        bookingDto.setStatus(BookingStatus.WAITING);
+        bookingDto.setBooker(booker);
         Booking booking = BookingMapper.bookingDtoToBooking(bookingDto, owner, booker);
         booking.setStart(bookingDto.getStart());
         booking.setEnd(bookingDto.getEnd());
+        booking.setItem(item);
         bookingRepository.save(booking);
         return BookingMapper.bookingToBookingDto(booking);
     }
@@ -51,4 +52,24 @@ public class BookingServiceImpl implements BookingService {
         return null;
     }
 
+    @Override
+    public BookingDto approve(long bookerId, long bookingId, boolean approved) {
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
+                new NoSuchObjectException("Booking not found"));
+        Item item = itemRepository.findById(booking.getItem().getId()).get();
+        if(bookerId == item.getUser().getId()) {
+            if(approved) {
+                item.setAvailable(false);
+                booking.setState(BookingStatus.APPROVED);
+            } else {
+                item.setAvailable(true);
+                booking.setState(BookingStatus.REJECTED);
+            }
+        }
+
+        bookingRepository.save(booking);
+        itemRepository.save(item);
+
+        return BookingMapper.bookingToBookingDto(booking);
+    }
 }

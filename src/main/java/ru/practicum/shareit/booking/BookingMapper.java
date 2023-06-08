@@ -1,19 +1,23 @@
 package ru.practicum.shareit.booking;
 
+import lombok.RequiredArgsConstructor;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.user.User;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 public class BookingMapper {
-
 
     public static BookingDto bookingToBookingDto(Booking booking) {
         return BookingDto.create(booking.id,
-                booking.getItemId(),
-                booking.booker.getId(),
+                booking.item.getId(),
+                booking.item,
+                booking.booker,
                 booking.getStart(),
                 booking.getEnd(),
                 booking.getState());
@@ -21,12 +25,12 @@ public class BookingMapper {
 
     public static Booking bookingDtoToBooking(BookingDto bookingDto, User owner, User booker) {
         return Booking.create(bookingDto.getId(),
-                bookingDto.getItemId(),
+                bookingDto.getItem(),
                 owner,
                 booker,
                 bookingDto.getStart(),
                 bookingDto.getEnd(),
-                bookingDto.getState());
+                bookingDto.getStatus());
     }
 
     public static List<BookingDto> bookingDtos(Collection<Booking> bookings) {

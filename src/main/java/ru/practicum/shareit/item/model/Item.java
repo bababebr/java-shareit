@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.review.Review;
@@ -9,7 +10,9 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer"})
 @Table(name = "Items")
 @Setter
 @Getter
