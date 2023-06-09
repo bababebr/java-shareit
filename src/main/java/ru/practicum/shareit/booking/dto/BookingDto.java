@@ -31,7 +31,6 @@ public class BookingDto {
     @Future
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     LocalDateTime start;
-    @NotNull
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     LocalDateTime end;
     @NotNull

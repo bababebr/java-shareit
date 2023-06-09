@@ -5,10 +5,10 @@ import ru.practicum.shareit.user.User;
 
 public class CommentMapper {
 
-    public static CommentDTO commentToDto(Comment comment) {
+    public static CommentDTO commentToDto(Comment comment, User user) {
         return CommentDTO.create(comment.getId(),
                 comment.getText(),
-                comment.getAuthor_id(),
+                user.getName(),
                 comment.getCreated());
     }
 

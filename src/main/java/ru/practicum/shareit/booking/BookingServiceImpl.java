@@ -122,7 +122,7 @@ public class BookingServiceImpl implements BookingService {
             case "WAITING":
                 return BookingMapper.bookingDtos(bookingRepository.findBookingsByBooker_IdAndStateOrderByStartDesc(userId, BookingStatus.WAITING));
             case "CURRENT":
-                return BookingMapper.bookingDtos(bookingRepository.findBookingsByBookerCurrent(userId, LocalDateTime.now()));
+                return BookingMapper.bookingDtos(bookingRepository.findBookingsByBooker_IdAndEndIsAfterAndStartIsBeforeOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now()));
             case "PAST":
                 return BookingMapper.bookingDtos(bookingRepository.findBookingsByBooker_IdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now()));
             case "FUTURE":
@@ -146,9 +146,9 @@ public class BookingServiceImpl implements BookingService {
             case "WAITING":
                 return BookingMapper.bookingDtos(bookingRepository.findBookingsByOwner_IdAndStateOrderByStartDesc(userId, BookingStatus.WAITING));
             case "CURRENT":
-                return BookingMapper.bookingDtos(bookingRepository.findBookingsByOwnerCurrent(userId, LocalDateTime.now()));
+                return BookingMapper.bookingDtos(bookingRepository.findBookingsByOwner_IdAndEndIsAfterAndStartIsBeforeOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now()));
             case "PAST":
-                return BookingMapper.bookingDtos(bookingRepository.findBookingsByOwner_IdAndEndIsBeforeOrderByStartAsc(userId, LocalDateTime.now()));
+                return BookingMapper.bookingDtos(bookingRepository.findBookingsByOwner_IdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now()));
             case "FUTURE":
                 return BookingMapper.bookingDtos(bookingRepository.findBookingsByOwner_IdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now()));
             default:

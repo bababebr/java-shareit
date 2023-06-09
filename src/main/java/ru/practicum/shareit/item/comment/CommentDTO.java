@@ -1,10 +1,7 @@
 package ru.practicum.shareit.item.comment;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import javax.validation.constraints.NotNull;
@@ -15,12 +12,13 @@ import java.time.LocalDateTime;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor(staticName = "create")
+@RequiredArgsConstructor
 public class CommentDTO {
     Long id;
     @NotNull
     String text;
     @NotNull
-    Long authorName;
+    String authorName;
     @PastOrPresent
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     LocalDateTime created;
