@@ -10,6 +10,7 @@ import ru.practicum.shareit.item.model.ItemRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -88,19 +89,58 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getAllUsersBooking(Long userId) {
+    public List<BookingDto> get(Long userId) {
         userRepository.findById(userId).orElseThrow(()
                 -> new NoSuchObjectException(String.format("User with ID=%s not found", userId)));
-        return BookingMapper.bookingDtos(bookingRepository.findBookingsByBooker_Id(userId));
+        return BookingMapper.bookingDtos(bookingRepository.findBookingsByBooker_IdOrderByStartDesc(userId));
+    }
+
+    @Override
+    public List<BookingDto> getAllUserBookings(Long userId, String status) {
+        userRepository.findById(userId).orElseThrow(()
+                -> new NoSuchObjectException(String.format("User with ID=%s not found", userId)));
+
+        switch (status) {
+            case "ALL":
+                return BookingMapper.bookingDtos(bookingRepository.findBookingsByBooker_IdOrderByStartDesc(userId));
+            case "APPROVED":
+                return BookingMapper.bookingDtos(bookingRepository.findBookingsByBooker_IdAndState(userId, BookingStatus.APPROVED));
+            case "REJECTED":
+                return BookingMapper.bookingDtos(bookingRepository.findBookingsByBooker_IdAndState(userId, BookingStatus.REJECTED));
+            case "WAITING":
+                return BookingMapper.bookingDtos(bookingRepository.findBookingsByBooker_IdAndState(userId, BookingStatus.WAITING));
+            case "CURRENT":
+                return BookingMapper.bookingDtos(bookingRepository.findBookingsByBookerCurrent(userId, LocalDateTime.now()));
+            case "PAST":
+                return BookingMapper.bookingDtos(bookingRepository.findBookingsByBooker_IdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now()));
+            case "FUTURE":
+                return BookingMapper.bookingDtos(bookingRepository.findBookingsByBooker_IdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now()));
+            default:
+                throw new NoSuchObjectException("Booking not found");
+        }
     }
 
     @Override
     public List<BookingDto> getAllOwnersBooking(Long userId, String state) {
         userRepository.findById(userId).orElseThrow(()
                 -> new NoSuchObjectException(String.format("User with ID=%s not found", userId)));
-        if(state == null) {
-            state = "ALL";
+        switch (state) {
+            case "ALL":
+                return BookingMapper.bookingDtos(bookingRepository.findBookingsByOwner_IdOrderByStartDesc(userId));
+            case "APPROVED":
+                return BookingMapper.bookingDtos(bookingRepository.findBookingsByOwner_IdAndState(userId, BookingStatus.APPROVED));
+            case "REJECTED":
+                return BookingMapper.bookingDtos(bookingRepository.findBookingsByOwner_IdAndState(userId, BookingStatus.REJECTED));
+            case "WAITING":
+                return BookingMapper.bookingDtos(bookingRepository.findBookingsByOwner_IdAndState(userId, BookingStatus.WAITING));
+            case "CURRENT":
+                return BookingMapper.bookingDtos(bookingRepository.findBookingsByOwnerCurrent(userId, LocalDateTime.now()));
+            case "PAST":
+                return BookingMapper.bookingDtos(bookingRepository.findBookingsByOwner_IdAndEndIsBeforeOrderByStartAsc(userId, LocalDateTime.now()));
+            case "FUTURE":
+                return BookingMapper.bookingDtos(bookingRepository.findBookingsByOwner_IdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now()));
+            default:
+                throw new NoSuchObjectException("Booking not found");
         }
-        return BookingMapper.bookingDtos(bookingRepository.findBookingsByOwner_IdAndState(userId, state));
     }
 }

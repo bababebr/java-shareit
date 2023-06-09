@@ -1,7 +1,6 @@
 package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 
@@ -30,18 +29,19 @@ public class BookingController {
 
     @GetMapping("/{bookingId}")
     public BookingDto get(@RequestHeader("X-Sharer-User-Id") Long userId,
-                          @PathVariable long bookingId) {
+                                      @PathVariable long bookingId) {
         return bookingService.get(bookingId, userId);
     }
 
     @GetMapping
-    public List<BookingDto> get(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        return bookingService.getAllUsersBooking(userId);
+    public List<BookingDto> getUserBookings(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                            @RequestParam(required = false, defaultValue = "ALL") String state) {
+        return bookingService.getAllUserBookings(userId, state);
     }
 
     @GetMapping("/owner")
-    public List<BookingDto> get(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                @PathVariable(required = false)  String state) {
+    public List<BookingDto> getOwnerBookings(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                            @RequestParam(required = false, defaultValue = "ALL")  String state) {
         return bookingService.getAllOwnersBooking(userId, state);
     }
 
