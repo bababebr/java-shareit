@@ -17,7 +17,7 @@ public class ItemController {
 
     @PostMapping
     public ItemDto add(@RequestHeader("X-Sharer-User-Id") Long userId,
-                          @Valid @RequestBody ItemDto itemDto) {
+                       @Valid @RequestBody ItemDto itemDto) {
         return itemService.addItem(itemDto, userId);
     }
 
@@ -29,13 +29,14 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> getUsersOwnItems(@RequestHeader("X-Sharer-User-Id") long userId) {
+    public List<ItemBookingHistoryDto> getUsersOwnItems(@RequestHeader("X-Sharer-User-Id") long userId) {
         return itemService.getUsersOwnItems(userId);
     }
 
     @GetMapping("/{itemId}")
-    public ItemBookingHistoryDto get(@PathVariable long itemId) {
-        return itemService.getItem(itemId);
+    public ItemBookingHistoryDto get(@RequestHeader("X-Sharer-User-Id") long userId,
+                                     @PathVariable long itemId) {
+        return itemService.getItem(itemId, userId);
     }
 
     @GetMapping("/search")

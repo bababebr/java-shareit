@@ -2,7 +2,8 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.dto.BookingDtoShort;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -20,6 +21,6 @@ public class ItemBookingHistoryDto {
     String description;
     @NotNull(message = "available cannot be null.")
     Boolean available;
-    Item lastBooking = null;
-    Item nextBooking = null;
+    BookingDtoShort lastBooking = null;
+    BookingDtoShort nextBooking = null;
 }
