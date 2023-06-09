@@ -1,26 +1,25 @@
 package ru.practicum.shareit.user;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NoSuchObjectException;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 class UserServiceImpl implements UserService {
     private final UserRepository repository;
 
-    @Autowired
-    public UserServiceImpl(UserRepository repository) {
-        this.repository = repository;
-    }
-
     @Override
+    @Transactional(readOnly = true)
     public List<UserDto> getAll() {
         return UserMapper.userToDto(repository.findAll());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDto get(long userId) {
         User user = repository.findById(userId).orElseThrow(()
                 -> new NoSuchObjectException(String.format("User with ID=%s not found", userId)));

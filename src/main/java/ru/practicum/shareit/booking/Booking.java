@@ -1,8 +1,8 @@
 package ru.practicum.shareit.booking;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
-import org.springframework.format.annotation.DateTimeFormat;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
 
@@ -33,7 +33,6 @@ public class Booking {
     @EqualsAndHashCode.Exclude
     User booker;
     @Column(name = "start_time")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     LocalDateTime start;
     @Column(name = "end_time")
     LocalDateTime end;

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.exception.ItemsAvailabilityException;
 import ru.practicum.shareit.exception.NoSuchObjectException;
+import ru.practicum.shareit.exception.StateException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.ItemRepository;
 import ru.practicum.shareit.user.User;
@@ -26,6 +27,10 @@ public class BookingServiceImpl implements BookingService {
         Item item = itemRepository.findById(bookingDto.getItemId()).orElseThrow(() ->
                 new NoSuchObjectException(String.format("Item with ID=%s not found", bookingDto.getItemId())));
         List<Booking> bookings = bookingRepository.findBookingsByItem_Id(item.getId());
+
+        if(bookerId == item.getUser().getId()) {
+            throw new NoSuchObjectException("Booking cannot be done by owner.");
+        }
 
         if (!item.getAvailable()) {
             throw new ItemsAvailabilityException(
@@ -67,21 +72,28 @@ public class BookingServiceImpl implements BookingService {
                 new NoSuchObjectException("Booking not found"));
         if (booking.getBooker().getId() == userId || booking.getOwner().getId() == userId) {
             return BookingMapper.bookingToBookingDto(booking);
+        } else {
+            throw new NoSuchObjectException("Access denied.");
         }
-        return null;
     }
 
     @Override
-    public BookingDto approve(long bookerId, long bookingId, boolean approved) {
+    public BookingDto approve(long ownerId, long bookingId, boolean approved) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
                 new NoSuchObjectException("Booking not found"));
         Item item = itemRepository.findById(booking.getItem().getId()).get();
-        if (bookerId == item.getUser().getId()) {
+
+        if (ownerId == item.getUser().getId()) {
+            if(!booking.getState().equals(BookingStatus.WAITING)){
+                throw new ItemsAvailabilityException("Status cannot be changed");
+            }
             if (approved) {
                 booking.setState(BookingStatus.APPROVED);
             } else {
                 booking.setState(BookingStatus.REJECTED);
             }
+        } else {
+            throw new NoSuchObjectException("Approve can be done only by item owner.");
         }
         bookingRepository.save(booking);
         itemRepository.save(item);
@@ -104,11 +116,11 @@ public class BookingServiceImpl implements BookingService {
             case "ALL":
                 return BookingMapper.bookingDtos(bookingRepository.findBookingsByBooker_IdOrderByStartDesc(userId));
             case "APPROVED":
-                return BookingMapper.bookingDtos(bookingRepository.findBookingsByBooker_IdAndState(userId, BookingStatus.APPROVED));
+                return BookingMapper.bookingDtos(bookingRepository.findBookingsByBooker_IdAndStateOrderByStartDesc(userId, BookingStatus.APPROVED));
             case "REJECTED":
-                return BookingMapper.bookingDtos(bookingRepository.findBookingsByBooker_IdAndState(userId, BookingStatus.REJECTED));
+                return BookingMapper.bookingDtos(bookingRepository.findBookingsByBooker_IdAndStateOrderByStartDesc(userId, BookingStatus.REJECTED));
             case "WAITING":
-                return BookingMapper.bookingDtos(bookingRepository.findBookingsByBooker_IdAndState(userId, BookingStatus.WAITING));
+                return BookingMapper.bookingDtos(bookingRepository.findBookingsByBooker_IdAndStateOrderByStartDesc(userId, BookingStatus.WAITING));
             case "CURRENT":
                 return BookingMapper.bookingDtos(bookingRepository.findBookingsByBookerCurrent(userId, LocalDateTime.now()));
             case "PAST":
@@ -116,7 +128,7 @@ public class BookingServiceImpl implements BookingService {
             case "FUTURE":
                 return BookingMapper.bookingDtos(bookingRepository.findBookingsByBooker_IdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now()));
             default:
-                throw new NoSuchObjectException("Booking not found");
+                throw new StateException("UNKNOWN_STATE");
         }
     }
 
@@ -128,11 +140,11 @@ public class BookingServiceImpl implements BookingService {
             case "ALL":
                 return BookingMapper.bookingDtos(bookingRepository.findBookingsByOwner_IdOrderByStartDesc(userId));
             case "APPROVED":
-                return BookingMapper.bookingDtos(bookingRepository.findBookingsByOwner_IdAndState(userId, BookingStatus.APPROVED));
+                return BookingMapper.bookingDtos(bookingRepository.findBookingsByOwner_IdAndStateOrderByStartDesc(userId, BookingStatus.APPROVED));
             case "REJECTED":
-                return BookingMapper.bookingDtos(bookingRepository.findBookingsByOwner_IdAndState(userId, BookingStatus.REJECTED));
+                return BookingMapper.bookingDtos(bookingRepository.findBookingsByOwner_IdAndStateOrderByStartDesc(userId, BookingStatus.REJECTED));
             case "WAITING":
-                return BookingMapper.bookingDtos(bookingRepository.findBookingsByOwner_IdAndState(userId, BookingStatus.WAITING));
+                return BookingMapper.bookingDtos(bookingRepository.findBookingsByOwner_IdAndStateOrderByStartDesc(userId, BookingStatus.WAITING));
             case "CURRENT":
                 return BookingMapper.bookingDtos(bookingRepository.findBookingsByOwnerCurrent(userId, LocalDateTime.now()));
             case "PAST":
@@ -140,7 +152,7 @@ public class BookingServiceImpl implements BookingService {
             case "FUTURE":
                 return BookingMapper.bookingDtos(bookingRepository.findBookingsByOwner_IdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now()));
             default:
-                throw new NoSuchObjectException("Booking not found");
+                throw new StateException("UNKNOWN_STATE");
         }
     }
 }
