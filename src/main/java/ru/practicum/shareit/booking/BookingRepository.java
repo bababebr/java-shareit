@@ -36,4 +36,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("SELECT b from Booking as b JOIN Item it on b.item.id = it.id WHERE it.id = ?1 order by b.start desc")
     List<Booking> findItemsBooking(Long itemId);
+
+    Booking findBookingByBooker_idAndItem_Id(Long bookerId, Long itemId);
 }

@@ -7,6 +7,10 @@ import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.exception.NoSuchObjectException;
+import ru.practicum.shareit.item.comment.Comment;
+import ru.practicum.shareit.item.comment.CommentDTO;
+import ru.practicum.shareit.item.comment.CommentMapper;
+import ru.practicum.shareit.item.comment.CommentRepository;
 import ru.practicum.shareit.item.dto.ItemBookingHistoryDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.User;
@@ -24,6 +28,7 @@ class ItemServiceImpl implements ItemService {
     private final ItemRepository repository;
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     public ItemDto addItem(ItemDto itemDto, long ownerId) {
@@ -77,6 +82,9 @@ class ItemServiceImpl implements ItemService {
         ItemBookingHistoryDto itemBookingHistoryDto = ItemMapper.itemBookingHistoryDto(repository.getReferenceById(itemId));
         itemBookingHistoryDto.setLastBooking(BookingMapper.bookingToBookingShort(lastBooking));
         itemBookingHistoryDto.setNextBooking(BookingMapper.bookingToBookingShort(nextBooking));
+
+        List<Comment> comments = commentRepository.findAllByItem_id(itemId);
+        itemBookingHistoryDto.getComments().addAll(comments);
         return itemBookingHistoryDto;
     }
 
@@ -98,5 +106,12 @@ class ItemServiceImpl implements ItemService {
         return items.stream().map(ItemMapper::itemToDto).collect(Collectors.toList());
     }
 
-
+    @Override
+    public CommentDTO addComment(Long itemId, long userId, CommentDTO commentDTO) {
+        Item item = repository.findById(itemId).get();
+        User user = userRepository.findById(userId).get();
+        Comment comment = CommentMapper.DtoToComment(commentDTO, item, user);
+        comment.setCreated(LocalDateTime.now());
+        return CommentMapper.commentToDto(commentRepository.save(comment));
+    }
 }
