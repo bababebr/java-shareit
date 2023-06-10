@@ -28,7 +28,7 @@ public class BookingServiceImpl implements BookingService {
                 new NoSuchObjectException(String.format("Item with ID=%s not found", bookingDto.getItemId())));
         List<Booking> bookings = bookingRepository.findBookingsByItem_IdOrderByStartDesc(item.getId());
 
-        if(bookerId == item.getUser().getId()) {
+        if(bookerId.equals(item.getUser().getId())) {
             throw new NoSuchObjectException("Booking cannot be done by owner.");
         }
 
@@ -62,15 +62,10 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingDto update(Long ownerId, Long bookingId, BookingDto bookingDto, BookingStatus state) {
-        return null;
-    }
-
-    @Override
     public BookingDto get(Long bookingId, Long userId) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
                 new NoSuchObjectException("Booking not found"));
-        if (booking.getBooker().getId() == userId || booking.getOwner().getId() == userId) {
+        if (booking.getBooker().getId().equals(userId) || booking.getOwner().getId().equals(userId)) {
             return BookingMapper.bookingToBookingDto(booking);
         } else {
             throw new NoSuchObjectException("Access denied.");

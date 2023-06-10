@@ -7,7 +7,6 @@ import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.BookingStatus;
-import ru.practicum.shareit.booking.dto.BookingDtoShort;
 import ru.practicum.shareit.exception.CommentException;
 import ru.practicum.shareit.exception.NoSuchObjectException;
 import ru.practicum.shareit.item.comment.Comment;
@@ -20,7 +19,6 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -72,23 +70,12 @@ class ItemServiceImpl implements ItemService {
     public ItemBookingHistoryDto getItem(long itemId, long userId) {
         Item item = repository.findById(itemId).orElseThrow(() ->
                 new NoSuchObjectException(String.format("Item with ID=%s not found", itemId)));
-        List<Booking> itemBookingsSortedByStart = bookingRepository.findBookingByItem_IdOrderByStartDesc(itemId);
-        List<Booking> itemBookingsSortedByEnd = bookingRepository.findBookingByItem_IdOrderByStartAsc(itemId);
+        List<Booking> itemBookings = bookingRepository.findBookingByItem_IdOrderByStartDesc(itemId);
         List<Comment> itemComments = commentRepository.findAllByItem_id(itemId);
         ItemBookingHistoryDto itemBookingHistoryDto = ItemMapper.itemBookingHistoryDto(item);
 
-        System.out.println(LocalDateTime.now());
-
-        for (Booking b : itemBookingsSortedByStart) {
-            System.out.println(b.getId() + " " + b.getStart() + " " + b.getEnd());
-        }
-
-        for (Booking b : itemBookingsSortedByEnd) {
-            System.out.println(b.getId() + " " + b.getStart() + " " + b.getEnd());
-        }
         if (item.getUser().getId() == userId) {
-            setBookings(itemBookingHistoryDto, itemBookingsSortedByStart, itemBookingsSortedByEnd, item.getUser());
-            setBookingsStar(itemBookingHistoryDto, itemBookingsSortedByStart, itemBookingsSortedByEnd, item.getUser());
+            setBookings(itemBookingHistoryDto, itemBookings, item.getUser());
         }
         setComments(itemBookingHistoryDto, itemComments);
 
@@ -129,28 +116,25 @@ class ItemServiceImpl implements ItemService {
         throw new CommentException(String.format("User with ID=?s didn't book item with ID=?s", userId, itemId));
     }
 
-    private void setBookings(ItemBookingHistoryDto item, List<Booking> bookingsStart, List<Booking> bookingsEnd, User owner) {
-        for (Booking b : bookingsEnd) {
-            if (b.getOwner().getId() == owner.getId()) {
-                for (Booking b1 : bookingsEnd) {
-                    if (b1.getStart().isAfter(LocalDateTime.now())) {
+    private void setBookings(ItemBookingHistoryDto item, List<Booking> bookings, User owner) {
+        for (Booking booking : bookings) {
+            if (booking.getOwner().getId() == owner.getId() && booking.getState() != BookingStatus.REJECTED) {
+                //Find NextBooking
+                for (Booking b : bookings) {
+                    if (b.getStart().isBefore(LocalDateTime.now())) {
                         break;
                     }
-                    item.setLastBooking(BookingMapper.bookingToBookingShort(b1));
+                    item.setNextBooking(BookingMapper.bookingToBookingShort(b));
                 }
-            }
-        }
-    }
-
-    private void setBookingsStar(ItemBookingHistoryDto item, List<Booking> bookingsStart, List<Booking> bookingsEnd, User owner) {
-        for (Booking b : bookingsStart) {
-            if (b.getOwner().getId() == owner.getId() && b.getState() != BookingStatus.REJECTED) {
-                for (Booking b2 : bookingsStart) {
-
-                    if (b2.getStart().isBefore(LocalDateTime.now())) {
+                //Find Last Booking
+                for (Booking b : bookings) {
+                    if (b.getStart().isAfter(LocalDateTime.now())) {
+                        continue;
+                    }
+                    item.setLastBooking(BookingMapper.bookingToBookingShort(b));
+                    if (b.getStart().isBefore(LocalDateTime.now())) {
                         break;
                     }
-                    item.setNextBooking(BookingMapper.bookingToBookingShort(b2));
                 }
             }
         }
