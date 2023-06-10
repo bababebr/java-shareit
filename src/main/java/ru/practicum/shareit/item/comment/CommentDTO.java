@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.comment;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import net.bytebuddy.asm.Advice;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -21,6 +22,6 @@ public class CommentDTO {
     String text;
     String authorName;
     @PastOrPresent
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.nnnn'Z'")
     LocalDateTime created;
 }

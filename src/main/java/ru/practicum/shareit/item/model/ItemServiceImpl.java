@@ -20,6 +20,7 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -87,6 +88,7 @@ class ItemServiceImpl implements ItemService {
         }
         if (item.getUser().getId() == userId) {
             setBookings(itemBookingHistoryDto, itemBookingsSortedByStart, itemBookingsSortedByEnd, item.getUser());
+            setBookingsStar(itemBookingHistoryDto, itemBookingsSortedByStart, itemBookingsSortedByEnd, item.getUser());
         }
         setComments(itemBookingHistoryDto, itemComments);
 
@@ -116,11 +118,11 @@ class ItemServiceImpl implements ItemService {
         Item item = repository.findById(itemId).get();
         User user = userRepository.findById(userId).get();
         List<Booking> booking = bookingRepository.findBookingByBookerAndItemAndStateOrderByStartDesc(userId, itemId, BookingStatus.APPROVED);
-        LocalDateTime now = LocalDateTime.now();
         for (Booking b : booking) {
-            if (b.getBooker().getId() == userId && b.getStart().isBefore(now)) {
+            if (b.getBooker().getId() == userId && b.getStart().isBefore(LocalDateTime.now())) {
+                commentDTO.setCreated(LocalDateTime.now());
                 Comment comment = CommentMapper.DtoToComment(commentDTO, item, user);
-                comment.setCreated(now);
+                comment.setCreated(LocalDateTime.now());
                 return CommentMapper.commentToDto(commentRepository.save(comment), user);
             }
         }
@@ -131,16 +133,20 @@ class ItemServiceImpl implements ItemService {
         for (Booking b : bookingsEnd) {
             if (b.getOwner().getId() == owner.getId()) {
                 for (Booking b1 : bookingsEnd) {
-                    item.setLastBooking(BookingMapper.bookingToBookingShort(b1));
-                    if(b1.getStart().isAfter(LocalDateTime.now())) {
+                    if (b1.getStart().isAfter(LocalDateTime.now())) {
                         break;
                     }
+                    item.setLastBooking(BookingMapper.bookingToBookingShort(b1));
                 }
             }
         }
+    }
+
+    private void setBookingsStar(ItemBookingHistoryDto item, List<Booking> bookingsStart, List<Booking> bookingsEnd, User owner) {
         for (Booking b : bookingsStart) {
-            if (b.getOwner().getId() == owner.getId()) {
+            if (b.getOwner().getId() == owner.getId() && b.getState() != BookingStatus.REJECTED) {
                 for (Booking b2 : bookingsStart) {
+
                     if (b2.getStart().isBefore(LocalDateTime.now())) {
                         break;
                     }
