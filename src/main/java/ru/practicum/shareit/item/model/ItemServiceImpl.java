@@ -7,6 +7,7 @@ import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.booking.dto.BookingDtoShort;
 import ru.practicum.shareit.exception.CommentException;
 import ru.practicum.shareit.exception.NoSuchObjectException;
 import ru.practicum.shareit.item.comment.Comment;
@@ -70,28 +71,16 @@ class ItemServiceImpl implements ItemService {
     public ItemBookingHistoryDto getItem(long itemId, long userId) {
         Item item = repository.findById(itemId).orElseThrow(() ->
                 new NoSuchObjectException(String.format("Item with ID=%s not found", itemId)));
-        User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchObjectException(""));
-        List<Booking> itemBookings = bookingRepository.findItemsBooking(itemId);
+
+        List<Booking> itemBookingsSortedByStart = bookingRepository.findItemsBookingSortByStart(itemId);
         List<Comment> itemComments = commentRepository.findAllByItem_id(itemId);
         ItemBookingHistoryDto itemBookingHistoryDto = ItemMapper.itemBookingHistoryDto(item);
-        LocalDateTime now = LocalDateTime.now();
-
-        for(Booking b : itemBookings) {
-            if(b.getOwner().getId() == userId) {
-                Booking lastBooking = itemBookings.get(0);
-                Booking nextBooking = itemBookings.get(0);
-                for (Booking b1 : itemBookings) {
-                    lastBooking = b1.getEnd().isBefore(lastBooking.getEnd()) ? b1 : lastBooking;
-                    nextBooking = b1.getStart().isAfter(now) ? b1 : nextBooking;
-                }
-                itemBookingHistoryDto.setLastBooking(BookingMapper.bookingToBookingShort(lastBooking));
-                itemBookingHistoryDto.setNextBooking(BookingMapper.bookingToBookingShort(nextBooking));
-            }
+        if (item.getUser().getId() == userId) {
+            setBookings(itemBookingHistoryDto, itemBookingsSortedByStart, item.getUser());
+        } else {
+            itemBookingHistoryDto.setNextBooking(null);
         }
-        for(Comment c : itemComments) {
-            User userC = userRepository.findById(c.getAuthor_id()).get();
-                itemBookingHistoryDto.getComments().add(CommentMapper.commentToDto(c, userC));
-        }
+        setComments(itemBookingHistoryDto, itemComments);
 
         return itemBookingHistoryDto;
     }
@@ -128,5 +117,27 @@ class ItemServiceImpl implements ItemService {
             }
         }
         throw new CommentException(String.format("User with ID=?s didn't book item with ID=?s", userId, itemId));
+    }
+
+    private void setBookings(ItemBookingHistoryDto item, List<Booking> bookings, User owner) {
+        for (Booking b : bookings) {
+            if (b.getOwner().getId() == owner.getId()) {
+                Booking nextBooking = bookings.get(0);
+                Booking lastBooking = bookings.get(0);
+                for (Booking b1 : bookings) {
+                    nextBooking = b1.getStart().isAfter(LocalDateTime.now()) ? b1 : nextBooking;
+                    lastBooking = b1.getEnd().isBefore(LocalDateTime.now()) ? b1 : lastBooking;
+                    item.setNextBooking(BookingMapper.bookingToBookingShort(nextBooking));
+                    item.setLastBooking(BookingMapper.bookingToBookingShort(lastBooking));
+                }
+            }
+        }
+    }
+
+    private void setComments(ItemBookingHistoryDto itemBookingHistoryDto, List<Comment> comments) {
+        for (Comment c : comments) {
+            User user = userRepository.findById(c.getAuthor_id()).get();
+            itemBookingHistoryDto.getComments().add(CommentMapper.commentToDto(c, user));
+        }
     }
 }
