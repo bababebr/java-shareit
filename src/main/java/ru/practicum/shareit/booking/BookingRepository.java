@@ -10,7 +10,7 @@ import java.util.List;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
-    List<Booking> findBookingsByItem_Id(Long itemId);
+    List<Booking> findBookingsByItem_IdOrderByStartDesc(Long itemId);
 
     List<Booking> findBookingsByBooker_IdOrderByStartDesc(Long userId);
 
@@ -36,4 +36,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findItemsBooking(Long itemId);
 
     List<Booking> findBookingByBooker_idAndItem_Id(Long bookerId, Long itemId);
+
+    @Query("SELECT b FROM Booking as b WHERE b.booker.id = ?1 AND b.item.id = ?2 AND b.state = ?3 order by b.start desc")
+    List<Booking> findBookingByBookerAndItemAndStateOrderByStartDesc(Long bookerId, Long itemId, BookingStatus state);
 }

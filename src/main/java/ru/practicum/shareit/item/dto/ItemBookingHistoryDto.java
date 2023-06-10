@@ -5,6 +5,7 @@ import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.dto.BookingDtoShort;
 import ru.practicum.shareit.item.comment.Comment;
+import ru.practicum.shareit.item.comment.CommentDTO;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -27,5 +28,5 @@ public class ItemBookingHistoryDto {
     Boolean available;
     BookingDtoShort lastBooking = null;
     BookingDtoShort nextBooking = null;
-    List<Comment> comments;
+    List<CommentDTO> comments;
 }

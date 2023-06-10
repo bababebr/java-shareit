@@ -26,7 +26,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto add(Long bookerId, BookingDto bookingDto) {
         Item item = itemRepository.findById(bookingDto.getItemId()).orElseThrow(() ->
                 new NoSuchObjectException(String.format("Item with ID=%s not found", bookingDto.getItemId())));
-        List<Booking> bookings = bookingRepository.findBookingsByItem_Id(item.getId());
+        List<Booking> bookings = bookingRepository.findBookingsByItem_IdOrderByStartDesc(item.getId());
 
         if(bookerId == item.getUser().getId()) {
             throw new NoSuchObjectException("Booking cannot be done by owner.");

@@ -11,7 +11,7 @@ import javax.validation.ValidationException;
 @RestControllerAdvice
 public class ExceptionsHandler {
 
-    @ExceptionHandler({ValidationException.class, ItemsAvailabilityException.class})
+    @ExceptionHandler({ValidationException.class, ItemsAvailabilityException.class, CommentException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse validationException(final RuntimeException e) {
         return new ErrorResponse("BadRequest Exception: ", e.getMessage());

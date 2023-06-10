@@ -6,6 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.exception.CommentException;
 import ru.practicum.shareit.exception.NoSuchObjectException;
 import ru.practicum.shareit.item.comment.Comment;
 import ru.practicum.shareit.item.comment.CommentDTO;
@@ -68,33 +70,28 @@ class ItemServiceImpl implements ItemService {
     public ItemBookingHistoryDto getItem(long itemId, long userId) {
         Item item = repository.findById(itemId).orElseThrow(() ->
                 new NoSuchObjectException(String.format("Item with ID=%s not found", itemId)));
+        User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchObjectException(""));
         List<Booking> itemBookings = bookingRepository.findItemsBooking(itemId);
+        List<Comment> itemComments = commentRepository.findAllByItem_id(itemId);
         ItemBookingHistoryDto itemBookingHistoryDto = ItemMapper.itemBookingHistoryDto(item);
-        List<Comment> comments = commentRepository.findAllByItem_id(itemId);
-        itemBookingHistoryDto.getComments().addAll(comments);
-        if (item.getUser().getId() != userId) {
-            return ItemMapper.itemBookingHistoryDto(item);
-        }
-/*        if (itemBookings.isEmpty() || item.getUser().getId() != userId) {
-            return ItemMapper.itemBookingHistoryDto(item);
-        }
-        for(Booking b : itemBookings) {
-            if(b.getOwner().getId() == item.getUser().getId() || b.getItem().getUser().getId() == userId){
-            } else {
-                return ItemMapper.itemBookingHistoryDto(item);
-            }
-        }*/
         LocalDateTime now = LocalDateTime.now();
-        Booking lastBooking = itemBookings.get(0);
-        Booking nextBooking = itemBookings.get(0);
-        for (Booking b : itemBookings) {
-            lastBooking = b.getEnd().isBefore(lastBooking.getEnd()) ? b : lastBooking;
-            nextBooking = b.getStart().isAfter(now) ? b : nextBooking;
+
+        for(Booking b : itemBookings) {
+            if(b.getOwner().getId() == userId) {
+                Booking lastBooking = itemBookings.get(0);
+                Booking nextBooking = itemBookings.get(0);
+                for (Booking b1 : itemBookings) {
+                    lastBooking = b1.getEnd().isBefore(lastBooking.getEnd()) ? b1 : lastBooking;
+                    nextBooking = b1.getStart().isAfter(now) ? b1 : nextBooking;
+                }
+                itemBookingHistoryDto.setLastBooking(BookingMapper.bookingToBookingShort(lastBooking));
+                itemBookingHistoryDto.setNextBooking(BookingMapper.bookingToBookingShort(nextBooking));
+            }
         }
-
-        itemBookingHistoryDto.setLastBooking(BookingMapper.bookingToBookingShort(lastBooking));
-        itemBookingHistoryDto.setNextBooking(BookingMapper.bookingToBookingShort(nextBooking));
-
+        for(Comment c : itemComments) {
+            User userC = userRepository.findById(c.getAuthor_id()).get();
+                itemBookingHistoryDto.getComments().add(CommentMapper.commentToDto(c, userC));
+        }
 
         return itemBookingHistoryDto;
     }
@@ -118,15 +115,18 @@ class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public CommentDTO addComment(Long itemId, long userId, CommentDTO commentDTO) {
+    public CommentDTO addComment(long itemId, long userId, CommentDTO commentDTO) {
         Item item = repository.findById(itemId).get();
         User user = userRepository.findById(userId).get();
-        List<Booking> booking = bookingRepository.findBookingByBooker_idAndItem_Id(userId, itemId);
-        if (booking.isEmpty()) {
-            throw new NoSuchObjectException("");
+        List<Booking> booking = bookingRepository.findBookingByBookerAndItemAndStateOrderByStartDesc(userId, itemId, BookingStatus.APPROVED);
+        LocalDateTime now = LocalDateTime.now();
+        for (Booking b : booking) {
+            if (b.getBooker().getId() == userId && b.getStart().isBefore(now)) {
+                Comment comment = CommentMapper.DtoToComment(commentDTO, item, user);
+                comment.setCreated(now);
+                return CommentMapper.commentToDto(commentRepository.save(comment), user);
+            }
         }
-        Comment comment = CommentMapper.DtoToComment(commentDTO, item, user);
-        comment.setCreated(LocalDateTime.now());
-        return CommentMapper.commentToDto(commentRepository.save(comment), user);
+        throw new CommentException(String.format("User with ID=?s didn't book item with ID=?s", userId, itemId));
     }
 }
