@@ -63,6 +63,11 @@
 			<artifactId>checkstyle</artifactId>
 			<version>10.9.1</version>
 		</dependency>
+		<dependency>
+			<groupId>com.github.spotbugs</groupId>
+			<artifactId>spotbugs-maven-plugin</artifactId>
+			<version>3.1.0-RC6</version>
+		</dependency>
 	</dependencies>
 
 	<build>

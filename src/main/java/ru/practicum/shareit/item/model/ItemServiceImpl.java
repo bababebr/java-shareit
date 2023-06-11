@@ -115,7 +115,8 @@ class ItemServiceImpl implements ItemService {
 
     private void setBookings(ItemBookingHistoryDto item, List<Booking> bookings, User owner) {
         for (Booking booking : bookings) {
-            if (booking.getOwner().getId() == owner.getId() && booking.getState() != BookingStatus.REJECTED) {
+            if (booking.getOwner().getId().longValue() == owner.getId().longValue() &&
+                    booking.getState() != BookingStatus.REJECTED) {
                 //Find NextBooking
                 for (Booking b : bookings) {
                     if (b.getStart().isBefore(LocalDateTime.now())) {
