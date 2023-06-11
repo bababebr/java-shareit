@@ -10,9 +10,8 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-
-@Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
+@Entity
 @Table(name = "Items")
 @Setter
 @Getter
@@ -35,5 +34,4 @@ public class Item {
     String name;
     @Transient
     final List<Review> reviewList = new ArrayList<>();
-
 }

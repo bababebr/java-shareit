@@ -37,5 +37,4 @@ public class Booking {
     LocalDateTime end;
     @Enumerated()
     BookingStatus state;
-
 }

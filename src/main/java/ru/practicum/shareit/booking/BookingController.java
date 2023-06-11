@@ -23,13 +23,13 @@ public class BookingController {
     @PatchMapping("/{bookingId}")
     public BookingDto approve(@RequestHeader("X-Sharer-User-Id") Long bookerId,
                               @PathVariable long bookingId,
-                              @RequestParam boolean approved){
+                              @RequestParam boolean approved) {
         return bookingService.approve(bookerId, bookingId, approved);
     }
 
     @GetMapping("/{bookingId}")
     public BookingDto get(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                      @PathVariable long bookingId) {
+                          @PathVariable long bookingId) {
         return bookingService.get(bookingId, userId);
     }
 
@@ -41,10 +41,7 @@ public class BookingController {
 
     @GetMapping("/owner")
     public List<BookingDto> getOwnerBookings(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                            @RequestParam(required = false, defaultValue = "ALL")  String state) {
+                                             @RequestParam(required = false, defaultValue = "ALL") String state) {
         return bookingService.getAllOwnersBooking(userId, state);
     }
-
-
-
 }

@@ -9,5 +9,4 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     @Query("SELECT c FROM Comment as c WHERE c.item_id = ?1")
     List<Comment> findAllByItem_id(Long itemId);
-
 }

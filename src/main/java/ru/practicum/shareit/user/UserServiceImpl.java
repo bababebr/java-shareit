@@ -10,6 +10,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 class UserServiceImpl implements UserService {
+
     private final UserRepository repository;
 
     @Override

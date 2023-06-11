@@ -28,26 +28,22 @@ public class BookingServiceImpl implements BookingService {
                 new NoSuchObjectException(String.format("Item with ID=%s not found", bookingDto.getItemId())));
         List<Booking> bookings = bookingRepository.findBookingsByItem_IdOrderByStartDesc(item.getId());
 
-        if(bookerId.equals(item.getUser().getId())) {
+        if (bookerId.equals(item.getUser().getId())) {
             throw new NoSuchObjectException("Booking cannot be done by owner.");
         }
-
         if (!item.getAvailable()) {
             throw new ItemsAvailabilityException(
                     String.format("Item with ID=%s is not available.", bookingDto.getItemId())
             );
         }
-
         for (Booking b : bookings) {
             if ((bookingDto.getStart().isBefore(b.getEnd()) && bookingDto.getStart().isAfter(b.getStart())) ||
                     bookingDto.getEnd().isAfter(b.getStart()) && bookingDto.getEnd().isBefore(b.getEnd())) {
                 throw new ItemsAvailabilityException(
                         String.format("Item with ID=%s is booked for this period.", bookingDto.getItemId())
                 );
-
             }
         }
-
         User owner = item.getUser();
         User booker = userRepository.findById(bookerId).orElseThrow(() ->
                 new NoSuchObjectException(String.format("User with ID=%s not found", bookerId)));
@@ -65,7 +61,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto get(Long bookingId, Long userId) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
                 new NoSuchObjectException("Booking not found"));
-        if (booking.getBooker().getId().equals(userId) || booking.getOwner().getId().equals(userId)) {
+        if (booking.getBooker().getId() == userId || booking.getOwner().getId() == userId) {
             return BookingMapper.bookingToBookingDto(booking);
         } else {
             throw new NoSuchObjectException("Access denied.");
@@ -77,9 +73,8 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
                 new NoSuchObjectException("Booking not found"));
         Item item = itemRepository.findById(booking.getItem().getId()).get();
-
         if (ownerId == item.getUser().getId()) {
-            if(!booking.getState().equals(BookingStatus.WAITING)){
+            if (!booking.getState().equals(BookingStatus.WAITING)) {
                 throw new ItemsAvailabilityException("Status cannot be changed");
             }
             if (approved) {
@@ -106,7 +101,6 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDto> getAllUserBookings(Long userId, String status) {
         userRepository.findById(userId).orElseThrow(()
                 -> new NoSuchObjectException(String.format("User with ID=%s not found", userId)));
-
         switch (status) {
             case "ALL":
                 return BookingMapper.bookingDtos(bookingRepository.findBookingsByBooker_IdOrderByStartDesc(userId));

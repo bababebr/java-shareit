@@ -27,6 +27,7 @@ public final class ItemMapper {
                 null,
                 new ArrayList<>());
     }
+
     public static Item dtoToItem(ItemDto itemDto, User owner) {
         return Item.create(itemDto.getId(),
                 owner,

@@ -42,7 +42,6 @@ class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto updateItem(ItemDto itemDto, long ownerId, long itemId) {
-
         if (repository.existsById(itemId)) {
             Item oldItem = repository.findById(itemId).get();
             if (oldItem.getUser().getId() != ownerId) {
@@ -73,7 +72,6 @@ class ItemServiceImpl implements ItemService {
         List<Booking> itemBookings = bookingRepository.findBookingByItem_IdOrderByStartDesc(itemId);
         List<Comment> itemComments = commentRepository.findAllByItem_id(itemId);
         ItemBookingHistoryDto itemBookingHistoryDto = ItemMapper.itemBookingHistoryDto(item);
-
         if (item.getUser().getId() == userId) {
             setBookings(itemBookingHistoryDto, itemBookings, item.getUser());
         }
@@ -86,8 +84,7 @@ class ItemServiceImpl implements ItemService {
     @Transactional(readOnly = true)
     public List<ItemBookingHistoryDto> getUsersOwnItems(long ownerId) {
         List<Item> items = repository.findItemsByUserId(ownerId);
-        List<ItemBookingHistoryDto> itemBookingHistoryDtos = items.stream().map(i -> getItem(i.getId(), ownerId)).collect(Collectors.toList());
-        return itemBookingHistoryDtos;
+        return items.stream().map(i -> getItem(i.getId(), ownerId)).collect(Collectors.toList());
     }
 
     @Override

@@ -16,6 +16,7 @@ public class ExceptionsHandler {
     public ErrorResponse validationException(final RuntimeException e) {
         return new ErrorResponse("BadRequest Exception: ", e.getMessage());
     }
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse stateException(final StateException e) {
