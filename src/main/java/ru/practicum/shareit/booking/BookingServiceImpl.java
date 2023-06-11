@@ -61,7 +61,8 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto get(Long bookingId, Long userId) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
                 new NoSuchObjectException("Booking not found"));
-        if (booking.getBooker().getId().longValue() == userId.longValue() || booking.getOwner().getId() == userId) {
+        if (booking.getBooker().getId().longValue() == userId.longValue() ||
+                booking.getOwner().getId().longValue() == userId.longValue()) {
             return BookingMapper.bookingToBookingDto(booking);
         } else {
             throw new NoSuchObjectException("Access denied.");
