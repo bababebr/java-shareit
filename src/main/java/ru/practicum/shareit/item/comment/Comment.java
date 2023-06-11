@@ -21,8 +21,10 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     String text;
-    Long item_id;
-    Long author_id;
+    @Column(name = "item_id")
+    Long itemId;
+    @Column(name = "author_id")
+    Long authorId;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     LocalDateTime created;
 }

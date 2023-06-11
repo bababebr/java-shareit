@@ -70,7 +70,7 @@ class ItemServiceImpl implements ItemService {
         Item item = repository.findById(itemId).orElseThrow(() ->
                 new NoSuchObjectException(String.format("Item with ID=%s not found", itemId)));
         List<Booking> itemBookings = bookingRepository.findBookingByItem_IdOrderByStartDesc(itemId);
-        List<Comment> itemComments = commentRepository.findAllByItem_id(itemId);
+        List<Comment> itemComments = commentRepository.findAllByItemId(itemId);
         ItemBookingHistoryDto itemBookingHistoryDto = ItemMapper.itemBookingHistoryDto(item);
         if (item.getUser().getId() == userId) {
             setBookings(itemBookingHistoryDto, itemBookings, item.getUser());
@@ -105,7 +105,7 @@ class ItemServiceImpl implements ItemService {
         for (Booking b : booking) {
             if (b.getBooker().getId() == userId && b.getStart().isBefore(LocalDateTime.now())) {
                 commentDTO.setCreated(LocalDateTime.now());
-                Comment comment = CommentMapper.DtoToComment(commentDTO, item, user);
+                Comment comment = CommentMapper.dtoToComment(commentDTO, item, user);
                 comment.setCreated(LocalDateTime.now());
                 return CommentMapper.commentToDto(commentRepository.save(comment), user);
             }
@@ -139,7 +139,7 @@ class ItemServiceImpl implements ItemService {
 
     private void setComments(ItemBookingHistoryDto itemBookingHistoryDto, List<Comment> comments) {
         for (Comment c : comments) {
-            User user = userRepository.findById(c.getAuthor_id()).get();
+            User user = userRepository.findById(c.getAuthorId()).get();
             itemBookingHistoryDto.getComments().add(CommentMapper.commentToDto(c, user));
         }
     }
