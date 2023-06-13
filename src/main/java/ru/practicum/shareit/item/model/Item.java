@@ -20,8 +20,7 @@ public class Item {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     @ManyToOne(fetch = FetchType.LAZY)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
+    @JoinColumn(name = "user_id")
     User user;
     @Column(name = "isAvailable")
     Boolean available;
