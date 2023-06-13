@@ -20,8 +20,8 @@ public class CommentMapper {
     public static Comment dtoToComment(CommentDTO commentDTO, Item item, User author) {
         return Comment.create(commentDTO.getId(),
                 commentDTO.getText(),
-                item.getId(),
-                author.getId(),
+                item,
+                author,
                 LocalDateTime.now());
     }
 }

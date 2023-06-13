@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-    @Query("SELECT c FROM Comment as c WHERE c.itemId = ?1")
+    @Query("SELECT c FROM Comment as c WHERE c.item = ?1")
     List<Comment> findAllByItemId(Long itemId);
 }

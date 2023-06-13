@@ -69,7 +69,7 @@ class ItemServiceImpl implements ItemService {
     public ItemBookingHistoryDto getItem(long itemId, long userId) {
         Item item = repository.findById(itemId).orElseThrow(() ->
                 new NoSuchObjectException(String.format("Item with ID=%s not found", itemId)));
-        List<Booking> itemBookings = bookingRepository.findBookingByItem_IdOrderByStartDesc(itemId);
+        List<Booking> itemBookings = bookingRepository.findByItem_IdOrderByStartDesc(itemId);
         List<Comment> itemComments = commentRepository.findAllByItemId(itemId);
         ItemBookingHistoryDto itemBookingHistoryDto = ItemMapper.itemBookingHistoryDto(item);
         if (item.getUser().getId() == userId) {
@@ -101,7 +101,7 @@ class ItemServiceImpl implements ItemService {
     public CommentDTO addComment(long itemId, long userId, CommentDTO commentDTO) {
         Item item = repository.findById(itemId).get();
         User user = userRepository.findById(userId).get();
-        List<Booking> booking = bookingRepository.findBookingByBookerAndItemAndStateOrderByStartDesc(userId, itemId, BookingStatus.APPROVED);
+        List<Booking> booking = bookingRepository.findByBookerAndItemAndStateOrderByStartDesc(userId, itemId, BookingStatus.APPROVED);
         for (Booking b : booking) {
             if (b.getBooker().getId() == userId && b.getStart().isBefore(LocalDateTime.now())) {
                 commentDTO.setCreated(LocalDateTime.now());
@@ -115,7 +115,7 @@ class ItemServiceImpl implements ItemService {
 
     private void setBookings(ItemBookingHistoryDto item, List<Booking> bookings, User owner) {
         for (Booking booking : bookings) {
-            if (booking.getOwner().getId().longValue() == owner.getId().longValue() &&
+            if (booking.getItem().getUser().getId().longValue() == owner.getId().longValue() &&
                     booking.getState() != BookingStatus.REJECTED) {
                 //Find NextBooking
                 for (Booking b : bookings) {
@@ -140,7 +140,7 @@ class ItemServiceImpl implements ItemService {
 
     private void setComments(ItemBookingHistoryDto itemBookingHistoryDto, List<Comment> comments) {
         for (Comment c : comments) {
-            User user = userRepository.findById(c.getAuthorId()).get();
+            User user = userRepository.findById(c.getAuthor().getId()).get();
             itemBookingHistoryDto.getComments().add(CommentMapper.commentToDto(c, user));
         }
     }

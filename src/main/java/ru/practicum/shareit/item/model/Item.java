@@ -7,7 +7,6 @@ import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
 
-@JsonIgnoreProperties({"hibernateLazyInitializer"})
 @Entity
 @Table(name = "Items")
 @Setter
