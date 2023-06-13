@@ -3,12 +3,9 @@ package ru.practicum.shareit.item.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.shareit.review.Review;
 import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 @Entity
@@ -32,6 +29,4 @@ public class Item {
     String description;
     @Column(name = "name")
     String name;
-    @Transient
-    final List<Review> reviewList = new ArrayList<>();
 }
