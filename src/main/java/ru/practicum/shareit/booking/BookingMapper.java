@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoShort;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
 
 import java.util.Collection;
@@ -23,9 +24,9 @@ public class BookingMapper {
                 booking.getState());
     }
 
-    public static Booking bookingDtoToBooking(BookingDto bookingDto, User owner, User booker) {
+    public static Booking bookingDtoToBooking(BookingDto bookingDto, User owner, User booker, Item item) {
         return Booking.create(bookingDto.getId(),
-                bookingDto.getItem(),
+                item,
                 owner,
                 booker,
                 bookingDto.getStart(),

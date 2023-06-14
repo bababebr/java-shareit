@@ -7,6 +7,7 @@ import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
 
+@JsonIgnoreProperties({"hibernateLazyInitializer"})
 @Entity
 @Table(name = "Items")
 @Setter
@@ -19,8 +20,8 @@ public class Item {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    User user;
+    @JoinColumn(name = "owner_id")
+    User owner;
     @Column(name = "isAvailable")
     Boolean available;
     @Column(name = "description")

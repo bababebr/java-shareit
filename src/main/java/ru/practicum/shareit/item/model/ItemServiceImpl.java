@@ -33,6 +33,7 @@ class ItemServiceImpl implements ItemService {
     private final CommentRepository commentRepository;
 
     @Override
+    @Transactional
     public ItemDto addItem(ItemDto itemDto, long ownerId) {
         User user = userRepository.findById(ownerId).orElseThrow(() ->
                 new NoSuchObjectException(String.format("There is no User with ID=%s.", ownerId)));
@@ -41,10 +42,11 @@ class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public ItemDto updateItem(ItemDto itemDto, long ownerId, long itemId) {
         if (repository.existsById(itemId)) {
             Item oldItem = repository.findById(itemId).get();
-            if (oldItem.getUser().getId() != ownerId) {
+            if (oldItem.getOwner().getId() != ownerId) {
                 throw new NoSuchObjectException(String.format("User ID= %s doesn't have Item with ID=%s",
                         ownerId, itemId));
             }
@@ -72,8 +74,8 @@ class ItemServiceImpl implements ItemService {
         List<Booking> itemBookings = bookingRepository.findByItem_IdOrderByStartDesc(itemId);
         List<Comment> itemComments = commentRepository.findAllByItemId(itemId);
         ItemBookingHistoryDto itemBookingHistoryDto = ItemMapper.itemBookingHistoryDto(item);
-        if (item.getUser().getId() == userId) {
-            setBookings(itemBookingHistoryDto, itemBookings, item.getUser());
+        if (item.getOwner().getId() == userId) {
+            setBookings(itemBookingHistoryDto, itemBookings, item.getOwner());
         }
         setComments(itemBookingHistoryDto, itemComments);
 
@@ -83,7 +85,7 @@ class ItemServiceImpl implements ItemService {
     @Override
     @Transactional(readOnly = true)
     public List<ItemBookingHistoryDto> getUsersOwnItems(long ownerId) {
-        List<Item> items = repository.findItemsByUserId(ownerId);
+        List<Item> items = repository.findItemsByOwner(ownerId);
         return items.stream().map(i -> getItem(i.getId(), ownerId)).collect(Collectors.toList());
     }
 
@@ -98,10 +100,11 @@ class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public CommentDTO addComment(long itemId, long userId, CommentDTO commentDTO) {
         Item item = repository.findById(itemId).get();
         User user = userRepository.findById(userId).get();
-        List<Booking> booking = bookingRepository.findByBookerAndItemAndStateOrderByStartDesc(userId, itemId, BookingStatus.APPROVED);
+        List<Booking> booking = bookingRepository.findByBookerAndItem(userId, itemId, BookingStatus.APPROVED);
         for (Booking b : booking) {
             if (b.getBooker().getId() == userId && b.getStart().isBefore(LocalDateTime.now())) {
                 commentDTO.setCreated(LocalDateTime.now());
@@ -115,7 +118,7 @@ class ItemServiceImpl implements ItemService {
 
     private void setBookings(ItemBookingHistoryDto item, List<Booking> bookings, User owner) {
         for (Booking booking : bookings) {
-            if (booking.getItem().getUser().getId().longValue() == owner.getId().longValue() &&
+            if (booking.getOwner().getId().longValue() == owner.getId().longValue() &&
                     booking.getState() != BookingStatus.REJECTED) {
                 //Find NextBooking
                 for (Booking b : bookings) {

@@ -29,7 +29,7 @@ public class ExceptionsHandler {
         return new ErrorResponse("Duplication Exception: ", e.getMessage());
     }
 
-    @ExceptionHandler({EntityNotFoundException.class, NoSuchObjectException.class})
+    @ExceptionHandler({EntityNotFoundException.class, NoSuchObjectException.class, NullPointerException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse itemNotFoundException(final RuntimeException e) {
         return new ErrorResponse("Object Exception: ", e.getMessage());

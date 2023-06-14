@@ -28,12 +28,14 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto create(UserDto userDto) {
         User user = repository.save(UserMapper.userDtoToUser(userDto));
         return UserMapper.userToDto(user);
     }
 
     @Override
+    @Transactional
     public UserDto update(UserDto userDto, long userId) {
         User user = repository.findById(userId).get();
         if (userDto.getEmail() != null) {
@@ -47,6 +49,7 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto delete(long userId) {
         UserDto userDto = get(userId);
         repository.deleteById(userId);
