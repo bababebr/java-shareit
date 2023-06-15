@@ -9,18 +9,17 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 class UserServiceImpl implements UserService {
 
     private final UserRepository repository;
 
     @Override
-    @Transactional(readOnly = true)
     public List<UserDto> getAll() {
         return UserMapper.userToDto(repository.findAll());
     }
 
     @Override
-    @Transactional(readOnly = true)
     public UserDto get(long userId) {
         User user = repository.findById(userId).orElseThrow(()
                 -> new NoSuchObjectException(String.format("User with ID=%s not found", userId)));

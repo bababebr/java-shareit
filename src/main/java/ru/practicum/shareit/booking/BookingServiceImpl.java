@@ -17,6 +17,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class BookingServiceImpl implements BookingService {
 
     private final ItemRepository itemRepository;
@@ -49,19 +50,17 @@ public class BookingServiceImpl implements BookingService {
                 );
             }
         }
-        User owner = item.getOwner();
-        Booking booking = BookingMapper.bookingDtoToBooking(bookingDto, owner, booker, item);
+        Booking booking = BookingMapper.bookingDtoToBooking(bookingDto, booker, item);
         bookingRepository.save(booking);
         return BookingMapper.bookingToBookingDto(booking);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public BookingDto get(Long bookingId, Long userId) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
                 new NoSuchObjectException("Booking not found"));
         if (booking.getBooker().getId().longValue() == userId.longValue() ||
-                booking.getOwner().getId().longValue() == userId.longValue()) {
+                booking.getItem().getOwner().getId().longValue() == userId.longValue()) {
             return BookingMapper.bookingToBookingDto(booking);
         } else {
             throw new NoSuchObjectException("Access denied.");
@@ -69,7 +68,6 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<BookingDto> get(Long userId) {
         userRepository.findById(userId).orElseThrow(()
                 -> new NoSuchObjectException(String.format("User with ID=%s not found", userId)));
@@ -77,7 +75,6 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<BookingDto> getAllUserBookings(Long userId, String status) {
         userRepository.findById(userId).orElseThrow(()
                 -> new NoSuchObjectException(String.format("User with ID=%s not found", userId)));
@@ -102,25 +99,24 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<BookingDto> getAllOwnersBooking(Long userId, String state) {
         userRepository.findById(userId).orElseThrow(()
                 -> new NoSuchObjectException(String.format("User with ID=%s not found", userId)));
         switch (state) {
             case "ALL":
-                return BookingMapper.bookingDtos(bookingRepository.findByOwner_IdOrderByStartDesc(userId));
+                return BookingMapper.bookingDtos(bookingRepository.findByItem_OwnerIdOrderByStartDesc(userId));
             case "APPROVED":
-                return BookingMapper.bookingDtos(bookingRepository.findByOwner_IdAndState(userId, BookingStatus.APPROVED));
+                return BookingMapper.bookingDtos(bookingRepository.findByItem_OwnerIdAndState(userId, BookingStatus.APPROVED));
             case "REJECTED":
-                return BookingMapper.bookingDtos(bookingRepository.findByOwner_IdAndState(userId, BookingStatus.REJECTED));
+                return BookingMapper.bookingDtos(bookingRepository.findByItem_OwnerIdAndState(userId, BookingStatus.REJECTED));
             case "WAITING":
-                return BookingMapper.bookingDtos(bookingRepository.findByOwner_IdAndState(userId, BookingStatus.WAITING));
+                return BookingMapper.bookingDtos(bookingRepository.findByItem_OwnerIdAndState(userId, BookingStatus.WAITING));
             case "CURRENT":
-                return BookingMapper.bookingDtos(bookingRepository.findByOwner_IdAndEndIsAfterAndStartIsBefore(userId, LocalDateTime.now(), LocalDateTime.now()));
+                return BookingMapper.bookingDtos(bookingRepository.findByItem_OwnerIdAndEndIsAfterAndStartIsBefore(userId, LocalDateTime.now(), LocalDateTime.now()));
             case "PAST":
-                return BookingMapper.bookingDtos(bookingRepository.findByOwner_IdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now()));
+                return BookingMapper.bookingDtos(bookingRepository.findByItem_OwnerIdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now()));
             case "FUTURE":
-                return BookingMapper.bookingDtos(bookingRepository.findByOwner_IdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now()));
+                return BookingMapper.bookingDtos(bookingRepository.findByItem_OwnerIdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now()));
             default:
                 throw new StateException("UNKNOWN_STATE");
         }
@@ -130,7 +126,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public BookingDto approve(long ownerId, long bookingId, boolean approved) {
         User owner = userRepository.findById(ownerId).orElseThrow(() -> new NoSuchObjectException("User nof found"));
-        Booking booking = bookingRepository.findByOwnerAndId(owner, bookingId);
+        Booking booking = bookingRepository.findByItem_OwnerIdAndId(owner.getId(), bookingId);
 
         if (!booking.getState().equals(BookingStatus.WAITING)) {
             throw new ItemsAvailabilityException("Status cannot be changed");

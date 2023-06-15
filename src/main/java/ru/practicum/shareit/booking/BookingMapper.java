@@ -24,10 +24,9 @@ public class BookingMapper {
                 booking.getState());
     }
 
-    public static Booking bookingDtoToBooking(BookingDto bookingDto, User owner, User booker, Item item) {
+    public static Booking bookingDtoToBooking(BookingDto bookingDto, User booker, Item item) {
         return Booking.create(bookingDto.getId(),
                 item,
-                owner,
                 booker,
                 bookingDto.getStart(),
                 bookingDto.getEnd(),

@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 class ItemServiceImpl implements ItemService {
 
     private final ItemRepository repository;
@@ -67,7 +68,6 @@ class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public ItemBookingHistoryDto getItem(long itemId, long userId) {
         Item item = repository.findById(itemId).orElseThrow(() ->
                 new NoSuchObjectException(String.format("Item with ID=%s not found", itemId)));
@@ -83,14 +83,12 @@ class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<ItemBookingHistoryDto> getUsersOwnItems(long ownerId) {
         List<Item> items = repository.findItemsByOwner(ownerId);
         return items.stream().map(i -> getItem(i.getId(), ownerId)).collect(Collectors.toList());
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<ItemDto> searchItemByDescription(String searchText) {
         if (searchText.isBlank()) {
             return new ArrayList<>();
@@ -118,7 +116,7 @@ class ItemServiceImpl implements ItemService {
 
     private void setBookings(ItemBookingHistoryDto item, List<Booking> bookings, User owner) {
         for (Booking booking : bookings) {
-            if (booking.getOwner().getId().longValue() == owner.getId().longValue() &&
+            if (booking.getItem().getOwner().getId().longValue() == owner.getId().longValue() &&
                     booking.getState() != BookingStatus.REJECTED) {
                 //Find NextBooking
                 for (Booking b : bookings) {
