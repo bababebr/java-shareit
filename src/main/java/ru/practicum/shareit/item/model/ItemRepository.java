@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
 public interface ItemRepository extends JpaRepository<Item, Long> {
     @Query("select it from Item as it join it.owner as o where o.id =?1")
     List<Item> findItemsByOwner(long ownerId);
