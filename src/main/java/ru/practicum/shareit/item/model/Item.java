@@ -1,27 +1,31 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.shareit.review.Review;
 import ru.practicum.shareit.user.User;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.persistence.*;
 
+@JsonIgnoreProperties({"hibernateLazyInitializer"})
+@Entity
+@Table(name = "Items")
 @Setter
 @Getter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@RequiredArgsConstructor(staticName = "create")
 @AllArgsConstructor(staticName = "create")
+@NoArgsConstructor
 public class Item {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id")
     User owner;
+    @Column(name = "isAvailable")
     Boolean available;
+    @Column(name = "description")
     String description;
+    @Column(name = "name")
     String name;
-    final List<Review> reviewList = new ArrayList<>();
 }

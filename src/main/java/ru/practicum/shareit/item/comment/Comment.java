@@ -1,5 +1,6 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.item.comment;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -9,28 +10,25 @@ import ru.practicum.shareit.user.User;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
-@FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "bookings")
-@NoArgsConstructor
-@AllArgsConstructor(staticName = "create")
+@Entity
+@Table(name = "Comments")
 @Getter
 @Setter
-public class Booking {
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@AllArgsConstructor(staticName = "create")
+@NoArgsConstructor
+public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
+    String text;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")
     Item item;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "booker_id")
-    User booker;
-    @Column(name = "start_time")
-    LocalDateTime start;
-    @Column(name = "end_time")
-    LocalDateTime end;
-    @Enumerated()
-    BookingStatus state;
+    @JoinColumn(name = "author_id")
+    User author;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    LocalDateTime created;
 }
