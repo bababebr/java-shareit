@@ -1,11 +1,10 @@
 package ru.practicum.shareit.request.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.checkerframework.checker.optional.qual.Present;
 import ru.practicum.shareit.item.model.Item;
 
-import javax.validation.constraints.Future;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,7 +19,8 @@ public class ItemRequestDto {
     Long id;
     @NotNull(message = "Description cannot be null.")
     String description;
-    @Present
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     LocalDateTime created;
-    List<Item> items = new ArrayList<>();
+    List<Item> items = null;
+    Long userId;
 }

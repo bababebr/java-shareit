@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor(staticName = "create")
 @NoArgsConstructor
+@ToString
 public class ItemRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,5 +24,6 @@ public class ItemRequest {
     LocalDateTime created;
     @Column(name = "User_id")
     Long userId;
-
+    @Column(name = "Item_id")
+    Long itemId = null;
 }

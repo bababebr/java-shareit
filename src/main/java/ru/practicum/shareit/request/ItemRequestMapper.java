@@ -12,7 +12,17 @@ public class ItemRequestMapper {
         ItemRequestDto itemRequestDto = ItemRequestDto.create(itemRequest.getId(),
                 itemRequest.getDescription(),
                 itemRequest.getCreated(),
-                itemsList);
+                itemsList,
+                itemRequest.getUserId());
+        return itemRequestDto;
+    }
+
+    public static ItemRequestDto requestToDto(ItemRequest itemRequest) {
+        ItemRequestDto itemRequestDto = ItemRequestDto.create(itemRequest.getId(),
+                itemRequest.getDescription(),
+                itemRequest.getCreated(),
+                new ArrayList<>(),
+                itemRequest.getUserId());
         return itemRequestDto;
     }
 
@@ -20,7 +30,7 @@ public class ItemRequestMapper {
         ItemRequest itemRequest = ItemRequest.create(itemRequestDto.getId(),
                 itemRequestDto.getDescription(),
                 itemRequestDto.getCreated(),
-                userId);
+                userId, itemRequestDto.getItems().get(0).getId());
         return itemRequest;
     }
 

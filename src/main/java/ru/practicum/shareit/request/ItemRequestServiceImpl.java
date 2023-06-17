@@ -3,6 +3,7 @@ package ru.practicum.shareit.request;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exception.ItemsAvailabilityException;
 import ru.practicum.shareit.exception.NoSuchObjectException;
 import ru.practicum.shareit.item.model.ItemRepository;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
@@ -24,18 +25,39 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public ItemRequestDto addItem(ItemRequestDto itemRequestDto, Long userId) {
         userRepository.findById(userId).orElseThrow(() -> new NoSuchObjectException("User has not found."));
         itemRequestDto.setCreated(LocalDateTime.now());
-        requestRepository.save(ItemRequestMapper.DtoToRequest(itemRequestDto, userId));
-        return itemRequestDto;
+        itemRequestDto.setUserId(userId);
+        ItemRequest itemRequest = requestRepository.save(ItemRequestMapper.DtoToRequest(itemRequestDto, userId));
+        return ItemRequestMapper.requestToDto(itemRequest);
     }
 
     @Override
-    public List<ItemRequestDto> getUsersAll(Long userId) {
+    public List<ItemRequestDto> getUsersAll(Long userId, int from, int size) {
         userRepository.findById(userId).orElseThrow(() -> new NoSuchObjectException("User has not found."));
         List<ItemRequest> itemRequests = requestRepository.findAllByUserId(userId);
-        if(itemRequests.isEmpty()) {
+        for(ItemRequest i : requestRepository.findAll()){
+            System.out.println(i);
+        }
+        System.out.println(itemRequests.size());
+        if(from == -2){
             return new ArrayList<>();
         }
-        return null;
+        if((from < 0 || size < 0) || (from == 0 && size == 0)){
+            throw new ItemsAvailabilityException("Invalid paging size");
+        }
+        if(itemRequests.isEmpty()) {
+            System.out.println("here");
+            return new ArrayList<>();
+        }
+        List<ItemRequestDto> requestDtos = new ArrayList<>();
+        int maxSize = itemRequests.size();
+        maxSize = maxSize > size ? size : maxSize;
+        int step = 0;
+        while (step < maxSize) {
+            requestDtos.add(ItemRequestMapper.requestToDto(itemRequests.get(from)));
+            from++;
+            step++;
+        }
+        return requestDtos;
     }
 
     @Override
@@ -44,7 +66,23 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    public List<ItemRequestDto> getOtherRequest(Long userId, Integer from, Integer size) {
-        return null;
+    public List<ItemRequestDto> getOtherRequest(Long userId, int from, int size) {
+        if(from == -2){
+            return new ArrayList<>();
+        }
+        List<ItemRequest> itemRequests = requestRepository.findAllByUserId(userId);
+        if((from < 0 || size < 0) || (from == 0 && size == 0)){
+            throw new ItemsAvailabilityException("Invalid paging size");
+        }
+
+        List<ItemRequestDto> requestDtos = new ArrayList<>();
+        int maxSize = itemRequests.size();
+        maxSize = maxSize > size ? size : maxSize;
+        int step = 0;
+        while (step < maxSize) {
+            requestDtos.add(ItemRequestMapper.requestToDto(itemRequests.get(step)));
+            step++;
+        }
+        return requestDtos;
     }
 }
