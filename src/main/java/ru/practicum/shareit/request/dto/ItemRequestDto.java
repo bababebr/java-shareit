@@ -20,7 +20,6 @@ public class ItemRequestDto {
     Long id;
     @NotNull(message = "Description cannot be null.")
     String description;
-    @NotNull(message = "Creating date cannot be null.")
     @Present
     LocalDateTime created;
     List<Item> items = new ArrayList<>();

@@ -26,4 +26,5 @@ public class ItemBookingHistoryDto {
     BookingDtoShort lastBooking = null;
     BookingDtoShort nextBooking = null;
     List<CommentDTO> comments;
+    Long requestId = null;
 }

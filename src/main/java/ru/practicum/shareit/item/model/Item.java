@@ -28,4 +28,5 @@ public class Item {
     String description;
     @Column(name = "name")
     String name;
+    Long requestId = null;
 }

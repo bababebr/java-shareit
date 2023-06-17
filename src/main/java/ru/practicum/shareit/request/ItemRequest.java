@@ -21,5 +21,7 @@ public class ItemRequest {
     Long id;
     String description;
     LocalDateTime created;
+    @Column(name = "User_id")
+    Long userId;
 
 }
