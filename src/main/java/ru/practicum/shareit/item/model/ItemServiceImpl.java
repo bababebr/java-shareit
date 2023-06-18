@@ -3,7 +3,6 @@ package ru.practicum.shareit.item.model;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestMapping;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingRepository;
@@ -17,9 +16,7 @@ import ru.practicum.shareit.item.comment.CommentRepository;
 import ru.practicum.shareit.item.dto.ItemBookingHistoryDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.request.ItemRequest;
-import ru.practicum.shareit.request.ItemRequestMapper;
 import ru.practicum.shareit.request.RequestRepository;
-import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 

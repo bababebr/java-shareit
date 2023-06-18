@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,15 +14,14 @@ import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.exception.NoSuchObjectException;
 import ru.practicum.shareit.item.comment.CommentRepository;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.*;
+import ru.practicum.shareit.item.model.ItemRepository;
+import ru.practicum.shareit.item.model.ItemService;
 import ru.practicum.shareit.request.RequestRepository;
-import ru.practicum.shareit.user.*;
+import ru.practicum.shareit.user.UserDto;
+import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.UserServiceImpl;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Optional;
-
-import static org.mockito.ArgumentMatchers.any;
 
 @Transactional
 @SpringBootTest
@@ -49,6 +47,7 @@ public class ItemServiceUnitTest {
     private ItemDto itemDto;
     private UserDto userDto;
     private UserDto ownerDto;
+
     @BeforeEach
     void setUp() {
         itemDto = ItemDto.create(1L, "Item 1", "Item 1", true, null);
@@ -56,6 +55,7 @@ public class ItemServiceUnitTest {
         ownerDto = UserDto.create(1L, "Owner 1", "Email");
 
     }
+
     @Test
     @Order(1)
     void testGetItemNotExist() {
@@ -77,7 +77,7 @@ public class ItemServiceUnitTest {
     @Test
     void testUpdateItemFail() {
         ItemDto itemDto = ItemDto.create(999L, "Item 1", "Item 1", true, null);
-        Assertions.assertThrows(NoSuchObjectException.class,() -> itemService.updateItem(itemDto, 1L, 1L));
+        Assertions.assertThrows(NoSuchObjectException.class, () -> itemService.updateItem(itemDto, 1L, 1L));
     }
 
     @Test

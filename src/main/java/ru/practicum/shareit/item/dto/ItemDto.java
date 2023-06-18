@@ -1,11 +1,11 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.shareit.request.ItemRequest;
 
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 

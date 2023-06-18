@@ -8,7 +8,6 @@ import ru.practicum.shareit.exception.NoSuchObjectException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.ItemRepository;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
-import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
@@ -29,7 +28,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         userRepository.findById(userId).orElseThrow(() -> new NoSuchObjectException("User has not found."));
         itemRequestDto.setCreated(LocalDateTime.now());
         itemRequestDto.setUserId(userId);
-        ItemRequest itemRequest = requestRepository.save(ItemRequestMapper.DtoToRequest(itemRequestDto, userId));
+        ItemRequest itemRequest = requestRepository.save(ItemRequestMapper.dtoToRequest(itemRequestDto, userId));
         return ItemRequestMapper.requestToDto(itemRequest);
     }
 

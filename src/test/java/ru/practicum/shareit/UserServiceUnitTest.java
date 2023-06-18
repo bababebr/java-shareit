@@ -39,12 +39,13 @@ public class UserServiceUnitTest {
         userDto.setName("1");
         userDto.setEmail("email");
 
-        UserDto userDto1= userService.create(userDto);
+        UserDto userDto1 = userService.create(userDto);
 
         assertSame(userDto1.getId(), userService.get(1L).getId());
         assertSame(userDto1.getName(), userService.get(1L).getName());
         assertSame(userDto1.getEmail(), userService.get(1L).getEmail());
     }
+
     @Test
     void testGetUserNotFound() {
         userService = new UserServiceImpl(mockUserRepository);
@@ -70,7 +71,7 @@ public class UserServiceUnitTest {
     }
 
     @Test
-    void testUpdateUserNotExist(){
+    void testUpdateUserNotExist() {
         assertThrows(NoSuchElementException.class, () -> userService.update(new UserDto(), 999L));
     }
 

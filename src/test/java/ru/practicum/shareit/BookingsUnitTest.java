@@ -41,8 +41,9 @@ public class BookingsUnitTest {
     private Item item;
     private User user;
     private User owner;
+
     @BeforeEach
-    void setUp(){
+    void setUp() {
         user = User.create(1L, "user", "user@mail.ru");
         owner = User.create(2L, "owner", "owner@mail.ru");
         item = Item.create(1L, owner, true, "Item 1", "Item", null);
@@ -75,7 +76,7 @@ public class BookingsUnitTest {
     void getBookingWithWrongUser() {
         final NoSuchObjectException exception = assertThrows(
                 NoSuchObjectException.class,
-                () -> bookingService.getAllUserBookings(user.getId(),"APPROVED" ,0, 0));
+                () -> bookingService.getAllUserBookings(user.getId(), "APPROVED", 0, 0));
         assertEquals("User with ID=1 not found", exception.getMessage());
     }
 

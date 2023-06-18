@@ -4,7 +4,6 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class ItemRequestMapper {
@@ -26,7 +25,7 @@ public class ItemRequestMapper {
         return itemRequestDto;
     }
 
-    public static ItemRequest DtoToRequest(ItemRequestDto itemRequestDto, Long userId) {
+    public static ItemRequest dtoToRequest(ItemRequestDto itemRequestDto, Long userId) {
         ItemRequest itemRequest = ItemRequest.create(itemRequestDto.getId(),
                 itemRequestDto.getDescription(),
                 itemRequestDto.getCreated(),
