@@ -18,6 +18,7 @@ import javax.transaction.Transactional;
 import javax.validation.ValidationException;
 
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -35,15 +36,19 @@ public class UserServiceUnitTest {
 
     @Test
     void testAddUserSuccess() {
+        userService = new UserServiceImpl(mockUserRepository);
+        User user = User.create(1L, "1", "email");
         UserDto userDto = new UserDto();
         userDto.setName("1");
         userDto.setEmail("email");
-
+        Mockito.when(mockUserRepository.save(Mockito.any(User.class)))
+                        .thenReturn(user);
+        Mockito.when(mockUserRepository.findById(Mockito.anyLong()))
+                .thenReturn(Optional.ofNullable(user));
         UserDto userDto1 = userService.create(userDto);
-
-        assertSame(userDto1.getId(), userService.get(1L).getId());
-        assertSame(userDto1.getName(), userService.get(1L).getName());
-        assertSame(userDto1.getEmail(), userService.get(1L).getEmail());
+        assertEquals(userDto1.getId(), userService.get(1L).getId());
+        assertEquals(userDto1.getName(), userService.get(1L).getName());
+        assertEquals(userDto1.getEmail(), userService.get(1L).getEmail());
     }
 
     @Test
