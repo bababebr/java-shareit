@@ -58,7 +58,7 @@ public class UserMapperUnitTest {
     @Test
     void testDtosToUsers() {
         ArrayList<User> testList = new ArrayList<>(UserMapper.userDtoToUser(List.of(userDto, userDto2)));
-        for(int i = 0; i < testList.size(); i++) {
+        for (int i = 0; i < testList.size(); i++) {
             Assertions.assertEquals(userArrayList.get(i).getId(), testList.get(i).getId());
             Assertions.assertEquals(userArrayList.get(i).getName(), testList.get(i).getName());
             Assertions.assertEquals(userArrayList.get(i).getEmail(), testList.get(i).getEmail());
@@ -68,7 +68,7 @@ public class UserMapperUnitTest {
     @Test
     void testUsersToDtos() {
         ArrayList<UserDto> testList = new ArrayList<>(UserMapper.userToDto(List.of(user, user2)));
-        for(int i = 0; i < testList.size(); i++) {
+        for (int i = 0; i < testList.size(); i++) {
             Assertions.assertEquals(userDtosArrayList.get(i).getId(), testList.get(i).getId());
             Assertions.assertEquals(userDtosArrayList.get(i).getName(), testList.get(i).getName());
             Assertions.assertEquals(userDtosArrayList.get(i).getEmail(), testList.get(i).getEmail());
