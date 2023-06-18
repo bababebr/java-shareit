@@ -95,7 +95,7 @@ public class BookingServiceImpl implements BookingService {
                 bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdOrderByStartDesc(userId));
                 maxSize = bookingDtos.size();
                 maxSize = maxSize > size ? size : maxSize;
-                maxSize = maxSize > (bookingDtos.size() - from) ? bookingDtos.size() - from: maxSize;
+                maxSize = maxSize > (bookingDtos.size() - from) ? bookingDtos.size() - from : maxSize;
                 while (step < maxSize) {
                     returnList.add(bookingDtos.get(from));
                     from++;
