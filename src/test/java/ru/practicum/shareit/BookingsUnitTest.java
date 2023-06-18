@@ -11,7 +11,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.shareit.booking.*;
-import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.exception.NoSuchObjectException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.ItemRepository;
@@ -19,7 +18,6 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
 import javax.transaction.Transactional;
-import javax.validation.ValidationException;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @ExtendWith(MockitoExtension.class)
-public class BookingsTest {
+public class BookingsUnitTest {
 
     @Autowired
     BookingService bookingService;
@@ -67,9 +65,6 @@ public class BookingsTest {
 
     @Test
     void getBookingWithWrongId() {
-        Mockito.when(bookingRepository.findById(Mockito.anyLong()))
-                .thenThrow(new NoSuchObjectException("Booking not found"));
-
         final NoSuchObjectException exception = assertThrows(
                 NoSuchObjectException.class,
                 () -> bookingService.get(booking.getId(), user.getId()));
@@ -78,8 +73,6 @@ public class BookingsTest {
 
     @Test
     void getBookingWithWrongUser() {
-        Mockito.when(bookingRepository.findByBooker_IdAndState(Mockito.anyLong(), Mockito.any(BookingStatus.class)))
-                .thenThrow(NoSuchObjectException.class);
         final NoSuchObjectException exception = assertThrows(
                 NoSuchObjectException.class,
                 () -> bookingService.getAllUserBookings(user.getId(),"APPROVED" ,0, 0));
