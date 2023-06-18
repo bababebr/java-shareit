@@ -95,6 +95,7 @@ public class BookingServiceImpl implements BookingService {
                 bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdOrderByStartDesc(userId));
                 maxSize = bookingDtos.size();
                 maxSize = maxSize > size ? size : maxSize;
+                maxSize = maxSize > (bookingDtos.size() - from) ? bookingDtos.size() - from: maxSize;
                 while (step < maxSize) {
                     returnList.add(bookingDtos.get(from));
                     from++;
@@ -107,6 +108,7 @@ public class BookingServiceImpl implements BookingService {
                 maxSize = maxSize > size ? size : maxSize;
                 while (step < maxSize) {
                     returnList.add(bookingDtos.get(from));
+                    from++;
                     step++;
                 }
                 return returnList;
@@ -116,6 +118,7 @@ public class BookingServiceImpl implements BookingService {
                 maxSize = maxSize > size ? size : maxSize;
                 while (step < maxSize) {
                     returnList.add(bookingDtos.get(from));
+                    from++;
                     step++;
                 }
                 return returnList;
@@ -125,15 +128,18 @@ public class BookingServiceImpl implements BookingService {
                 maxSize = maxSize > size ? size : maxSize;
                 while (step < maxSize) {
                     returnList.add(bookingDtos.get(from));
+                    from++;
                     step++;
                 }
                 return returnList;
             case "CURRENT":
                 bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdAndEndIsAfterAndStartIsBefore(userId, LocalDateTime.now(), LocalDateTime.now()));
                 maxSize = bookingDtos.size();
+                System.out.println(maxSize);
                 maxSize = maxSize > size ? size : maxSize;
                 while (step < maxSize) {
                     returnList.add(bookingDtos.get(from));
+                    from++;
                     step++;
                 }
                 return returnList;
@@ -143,6 +149,7 @@ public class BookingServiceImpl implements BookingService {
                 maxSize = maxSize > size ? size : maxSize;
                 while (step < maxSize) {
                     returnList.add(bookingDtos.get(from));
+                    from++;
                     step++;
                 }
                 return returnList;
@@ -152,6 +159,7 @@ public class BookingServiceImpl implements BookingService {
                 maxSize = maxSize > size ? size : maxSize;
                 while (step < maxSize) {
                     returnList.add(bookingDtos.get(from));
+                    from++;
                     step++;
                 }
                 return returnList;
@@ -193,6 +201,7 @@ public class BookingServiceImpl implements BookingService {
                 maxSize = maxSize > size ? size : maxSize;
                 while (step < maxSize) {
                     returnList.add(bookingDtos.get(step));
+                    from++;
                     step++;
                 }
                 return returnList;
@@ -202,6 +211,7 @@ public class BookingServiceImpl implements BookingService {
                 maxSize = maxSize > size ? size : maxSize;
                 while (step < maxSize) {
                     returnList.add(bookingDtos.get(step));
+                    from++;
                     step++;
                 }
                 return returnList;
@@ -211,6 +221,7 @@ public class BookingServiceImpl implements BookingService {
                 maxSize = maxSize > size ? size : maxSize;
                 while (step < maxSize) {
                     returnList.add(bookingDtos.get(step));
+                    from++;
                     step++;
                 }
                 return returnList;
@@ -220,6 +231,7 @@ public class BookingServiceImpl implements BookingService {
                 maxSize = maxSize > size ? size : maxSize;
                 while (step < maxSize) {
                     returnList.add(bookingDtos.get(step));
+                    from++;
                     step++;
                 }
                 return returnList;
@@ -229,6 +241,7 @@ public class BookingServiceImpl implements BookingService {
                 maxSize = maxSize > size ? size : maxSize;
                 while (step < maxSize) {
                     returnList.add(bookingDtos.get(step));
+                    from++;
                     step++;
                 }
                 return returnList;
@@ -238,6 +251,7 @@ public class BookingServiceImpl implements BookingService {
                 maxSize = maxSize > size ? size : maxSize;
                 while (step < maxSize) {
                     returnList.add(bookingDtos.get(step));
+                    from++;
                     step++;
                 }
                 return returnList;

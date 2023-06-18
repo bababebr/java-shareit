@@ -10,7 +10,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService {
 
     private final UserRepository repository;
 

@@ -1,10 +1,6 @@
 package ru.practicum.shareit.user;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import javax.validation.constraints.*;
@@ -14,6 +10,7 @@ import javax.validation.constraints.*;
 @AllArgsConstructor(staticName = "create")
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@EqualsAndHashCode
 public class UserDto {
     @Positive
     Long id;
