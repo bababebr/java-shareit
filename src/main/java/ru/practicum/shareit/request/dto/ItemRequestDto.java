@@ -21,6 +21,6 @@ public class ItemRequestDto {
     String description;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     LocalDateTime created;
-    List<Item> items = null;
+    List<Item> items = new ArrayList<>();
     Long userId;
 }

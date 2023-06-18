@@ -10,4 +10,7 @@ public interface RequestRepository extends JpaRepository<ItemRequest, Long> {
     @Query("SELECT ir FROM ItemRequest as ir WHERE ir.userId =?1")
     List<ItemRequest> findAllByUserId(Long userId);
 
+    @Query("SELECT ir FROM ItemRequest as ir WHERE ir.userId <>?1")
+    List<ItemRequest> findAllForOtherUsers(Long userId);
+
 }

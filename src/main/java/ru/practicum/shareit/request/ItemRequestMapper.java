@@ -30,7 +30,8 @@ public class ItemRequestMapper {
         ItemRequest itemRequest = ItemRequest.create(itemRequestDto.getId(),
                 itemRequestDto.getDescription(),
                 itemRequestDto.getCreated(),
-                userId, itemRequestDto.getItems().get(0).getId());
+                userId,
+                null);
         return itemRequest;
     }
 

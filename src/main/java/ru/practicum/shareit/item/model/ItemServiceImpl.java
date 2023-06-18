@@ -44,16 +44,13 @@ class ItemServiceImpl implements ItemService {
     public ItemDto addItem(ItemDto itemDto, long ownerId) {
         User user = userRepository.findById(ownerId).orElseThrow(() ->
                 new NoSuchObjectException(String.format("There is no User with ID=%s.", ownerId)));
+        Item item = repository.save(ItemMapper.dtoToItem(itemDto, user));
         if (itemDto.getRequestId() != null) {
             ItemRequest itemRequest = requestRepository.findById(itemDto.getRequestId()).get();
-            ItemRequestDto itemRequestDto = ItemRequestMapper.requestToDto(itemRequest);
-            itemRequestDto.getItems().add(ItemMapper.dtoToItem(itemDto, user));
-
-            itemRequest = ItemRequestMapper.DtoToRequest(itemRequestDto, itemRequest.getUserId());
-            itemRequest.setItemId(itemDto.getId());
+            itemRequest.setItemId(item.getId());
             requestRepository.save(itemRequest);
         }
-        Item item = repository.save(ItemMapper.dtoToItem(itemDto, user));
+
         return ItemMapper.itemToDto(item);
     }
 
