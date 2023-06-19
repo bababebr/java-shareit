@@ -2,7 +2,7 @@ package ru.practicum.shareit.user;
 
 import java.util.List;
 
-interface UserService {
+public interface UserService {
 
     List<UserDto> getAll();
 
