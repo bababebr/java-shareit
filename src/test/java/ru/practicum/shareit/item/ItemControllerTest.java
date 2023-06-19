@@ -23,6 +23,7 @@ import ru.practicum.shareit.user.UserDto;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static org.hamcrest.Matchers.is;
@@ -57,7 +58,6 @@ class ItemControllerTest {
 
     @BeforeEach
     void setUp() {
-
         mvc = MockMvcBuilders
                 .standaloneSetup(controller)
                 .setControllerAdvice(ExceptionsHandler.class)
@@ -71,6 +71,7 @@ class ItemControllerTest {
         item2 = Item.create(itemDto2False.getId(), user2, itemDto2False.getAvailable(),
                 itemDto2False.getDescription(), itemDto2False.getName(), itemDto2False.getRequestId());
         commentDTO = CommentDTO.create(1L, "text", user1.getName(), LocalDateTime.now());
+        mapper.findAndRegisterModules();
     }
 
     @Test
@@ -177,7 +178,7 @@ class ItemControllerTest {
     void addComment() throws Exception {
         when(itemService.addComment(anyLong(), anyLong(), any(CommentDTO.class)))
                 .thenReturn(commentDTO);
-        mvc.perform(MockMvcRequestBuilders.get("/items/{itemId}/comment", item1.getId())
+        mvc.perform(post("/items/{itemId}/comment", item1.getId())
                         .header("X-Sharer-User-Id", userDto1.getId())
                         .content(mapper.writeValueAsString(commentDTO))
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -186,7 +187,8 @@ class ItemControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(commentDTO.getId()), Long.class))
                 .andExpect(jsonPath("$.text", is(commentDTO.getText()), String.class))
-                .andExpect(jsonPath("$.created", is(commentDTO.getCreated()), String.class))
+                .andExpect(jsonPath("$.created", is(commentDTO.getCreated().
+                        format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.nnnn'Z'"))), String.class))
                 .andExpect(jsonPath("$.authorName", is(commentDTO.getAuthorName()), Boolean.class));
     }
 }
