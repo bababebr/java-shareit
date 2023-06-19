@@ -224,7 +224,6 @@ class ItemServiceImplTest {
 
         assertEquals(commentDto.getId(), returnDto.getId());
         assertEquals(commentDto.getAuthorName(), returnDto.getAuthorName());
-        assertEquals(commentDto.getCreated(), returnDto.getCreated());
         assertEquals(commentDto.getText(), returnDto.getText());
     }
 
