@@ -74,7 +74,7 @@ class ItemServiceImplTest {
         item2 = Item.create(2L, booker, true, "item 2", "item 2", null);
         itemDto1 = ItemMapper.itemToDto(item1);
         itemDto2 = ItemMapper.itemToDto(item2);
-        bookingItem1 = Booking.create(1L, item1, booker, LocalDateTime.now(), LocalDateTime.now(),
+        bookingItem1 = Booking.create(1L, item1, booker, LocalDateTime.now().plusHours(1), LocalDateTime.now().plusHours(2),
                 BookingStatus.APPROVED);
         bookingItem2 = Booking.create(2L, item2, owner, LocalDateTime.now(), LocalDateTime.now().plusHours(1),
                 BookingStatus.APPROVED);
