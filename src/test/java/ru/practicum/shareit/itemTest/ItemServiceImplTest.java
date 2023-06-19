@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,17 +20,17 @@ import ru.practicum.shareit.item.comment.CommentMapper;
 import ru.practicum.shareit.item.comment.CommentRepository;
 import ru.practicum.shareit.item.dto.ItemBookingHistoryDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.*;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.model.ItemMapper;
+import ru.practicum.shareit.item.model.ItemRepository;
+import ru.practicum.shareit.item.model.ItemServiceImpl;
 import ru.practicum.shareit.request.RequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
-import ru.practicum.shareit.user.UserServiceImpl;
 
 import javax.transaction.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -228,6 +227,7 @@ class ItemServiceImplTest {
         assertEquals(commentDto.getCreated(), returnDto.getCreated());
         assertEquals(commentDto.getText(), returnDto.getText());
     }
+
     @Test
     void addCommentBookingsNotStarted() {
         CommentDTO commentDto = CommentDTO.create(1L, "booking 1", booker.getName(), LocalDateTime.now().minusHours(1));
