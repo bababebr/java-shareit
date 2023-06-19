@@ -1,4 +1,4 @@
-package ru.practicum.shareit.UserTest;
+package ru.practicum.shareit.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
@@ -15,10 +15,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.practicum.shareit.exception.ExceptionsHandler;
 import ru.practicum.shareit.exception.NoSuchObjectException;
-import ru.practicum.shareit.user.UserController;
-import ru.practicum.shareit.user.UserDto;
-import ru.practicum.shareit.user.UserRepository;
-import ru.practicum.shareit.user.UserService;
 
 import javax.validation.ValidationException;
 import java.nio.charset.StandardCharsets;
@@ -34,14 +30,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(MockitoExtension.class)
 class UserControllerTest {
-
     @Mock
     private UserService userService;
-    @Mock
-    private UserRepository userRepository;
     @InjectMocks
     private UserController controller;
-
     private final ObjectMapper mapper = new ObjectMapper();
     private MockMvc mvc;
 
