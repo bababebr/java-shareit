@@ -11,22 +11,21 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.exception.ExceptionsHandler;
 import ru.practicum.shareit.exception.NoSuchObjectException;
-import ru.practicum.shareit.item.comment.CommentRepository;
+import ru.practicum.shareit.item.comment.CommentDTO;
 import ru.practicum.shareit.item.dto.ItemBookingHistoryDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.*;
-import ru.practicum.shareit.request.RequestRepository;
-import ru.practicum.shareit.user.*;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.model.ItemService;
+import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.UserDto;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -54,6 +53,8 @@ class ItemControllerTest {
     private User user1 = User.create(1L, "user 1", "user 1");
     private User user2 = User.create(2L, "user 2", "user 2");
 
+    private CommentDTO commentDTO;
+
     @BeforeEach
     void setUp() {
 
@@ -69,6 +70,7 @@ class ItemControllerTest {
                 itemDto1True.getName(), itemDto1True.getRequestId());
         item2 = Item.create(itemDto2False.getId(), user2, itemDto2False.getAvailable(),
                 itemDto2False.getDescription(), itemDto2False.getName(), itemDto2False.getRequestId());
+        commentDTO = CommentDTO.create(1L, "text", user1.getName(), LocalDateTime.now());
     }
 
     @Test
@@ -159,10 +161,32 @@ class ItemControllerTest {
     }
 
     @Test
-    void search() {
+    void search() throws Exception {
+        when(itemService.searchItemByDescription(anyString()))
+                .thenReturn(List.of(itemDto3True, itemDto1True));
+        mvc.perform(MockMvcRequestBuilders.get("/items/search")
+                        .param("text", "test")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()", is(2)));
     }
 
     @Test
-    void addComment() {
+    void addComment() throws Exception {
+        when(itemService.addComment(anyLong(), anyLong(), any(CommentDTO.class)))
+                .thenReturn(commentDTO);
+        mvc.perform(MockMvcRequestBuilders.get("/items/{itemId}/comment", item1.getId())
+                        .header("X-Sharer-User-Id", userDto1.getId())
+                        .content(mapper.writeValueAsString(commentDTO))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(commentDTO.getId()), Long.class))
+                .andExpect(jsonPath("$.text", is(commentDTO.getText()), String.class))
+                .andExpect(jsonPath("$.created", is(commentDTO.getCreated()), String.class))
+                .andExpect(jsonPath("$.authorName", is(commentDTO.getAuthorName()), Boolean.class));
     }
 }
