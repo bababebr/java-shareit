@@ -23,12 +23,6 @@ public class ExceptionsHandler {
         return new ErrorResponse("Unknown state: UNSUPPORTED_STATUS", e.getMessage());
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse duplicationException(final DuplicationException e) {
-        return new ErrorResponse("Duplication Exception: ", e.getMessage());
-    }
-
     @ExceptionHandler({EntityNotFoundException.class, NoSuchObjectException.class, NullPointerException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse itemNotFoundException(final RuntimeException e) {

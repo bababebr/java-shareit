@@ -135,7 +135,6 @@ public class BookingServiceImpl implements BookingService {
             case "CURRENT":
                 bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdAndEndIsAfterAndStartIsBefore(userId, LocalDateTime.now(), LocalDateTime.now()));
                 maxSize = bookingDtos.size();
-                System.out.println(maxSize);
                 maxSize = maxSize > size ? size : maxSize;
                 while (step < maxSize) {
                     returnList.add(bookingDtos.get(from));
