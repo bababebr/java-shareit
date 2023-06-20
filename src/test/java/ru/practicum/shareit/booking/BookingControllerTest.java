@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.exception.ExceptionsHandler;
@@ -19,11 +20,15 @@ import ru.practicum.shareit.user.User;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -39,11 +44,16 @@ class BookingControllerTest {
     @InjectMocks
     BookingController controller;
 
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
     private MockMvc mvc;
     private User owner;
     private User booker;
     private Item item;
     private BookingDto bookingDto;
+
+    private LocalDateTime start;
+    private LocalDateTime end;
 
     @BeforeEach
     void setUp() {
@@ -55,8 +65,10 @@ class BookingControllerTest {
         owner = User.create(1L, "owner", "owner@mail.ru");
         booker = User.create(2L, "booker", "booker@mail.ru");
         item = Item.create(1L, owner, true, "desc", "item 1", null);
-        bookingDto = BookingDto.create(1L, item.getId(), item, booker, LocalDateTime.now().plusMinutes(10),
-                LocalDateTime.now().plusHours(1), BookingStatus.WAITING);
+        start = LocalDateTime.now().plusMinutes(10);
+        end = start.plusHours(1);
+        bookingDto = BookingDto.create(1L, item.getId(), item, booker, start,
+                end, BookingStatus.WAITING);
     }
 
     @Test
@@ -73,6 +85,8 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$.id", is(bookingDto.getId()), Long.class))
                 .andExpect(jsonPath("$.booker.id", is(bookingDto.getBooker().getId()), Long.class))
                 .andExpect(jsonPath("$.itemId", is(item.getId()), Long.class))
+                .andExpect(jsonPath("$.start", is(bookingDto.getStart().format(formatter)), LocalDateTime.class))
+                .andExpect(jsonPath("$.end", is(bookingDto.getEnd().format(formatter)), LocalDateTime.class))
                 .andExpect(jsonPath("$.status", is("WAITING")));
     }
 
@@ -139,18 +153,412 @@ class BookingControllerTest {
     }
 
     @Test
-    void approve() {
+    void approve() throws Exception {
+        when(bookingService.approve(anyLong(), anyLong(), anyBoolean()))
+                .thenAnswer(invocationOnMock -> {
+                    Long bookerId = invocationOnMock.getArgument(0, Long.class);
+                    Long bookingId = invocationOnMock.getArgument(1, Long.class);
+                    Boolean isApproved = invocationOnMock.getArgument(2, Boolean.class);
+
+                    if (!booker.getId().equals(bookerId)) {
+                        throw new NoSuchObjectException("");
+                    }
+                    if (!bookingDto.getId().equals(bookingId)) {
+                        throw new NoSuchObjectException("");
+                    }
+                    if (!bookingDto.getStatus().equals(BookingStatus.WAITING)) {
+                        throw new ItemsAvailabilityException("");
+                    }
+                    if (isApproved) {
+                        bookingDto.setStatus(BookingStatus.APPROVED);
+                    } else {
+                        bookingDto.setStatus(BookingStatus.REJECTED);
+                    }
+                    return bookingDto;
+                });
+        mvc.perform(patch("/bookings/{bookingId}", bookingDto.getId())
+                        .header("X-Sharer-User-Id", booker.getId())
+                        .param("approved", "true")
+                        .content(mapper.writeValueAsString(bookingDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.id", is(bookingDto.getItemId()), Long.class))
+                .andExpect(jsonPath("$.booker.id", is(bookingDto.getBooker().getId()), Long.class))
+                .andExpect(jsonPath("$.start", is(bookingDto.getStart().format(formatter)), LocalDateTime.class))
+                .andExpect(jsonPath("$.end", is(bookingDto.getEnd().format(formatter)), LocalDateTime.class))
+                .andExpect(jsonPath("$.itemId", is(item.getId()), Long.class))
+                .andExpect(jsonPath("$.status", is("APPROVED")));
+
+        //Booking Not Found
+        mvc.perform(patch("/bookings/{bookingId}", 2L)
+                        .header("X-Sharer-User-Id", booker.getId())
+                        .param("approved", "true")
+                        .content(mapper.writeValueAsString(bookingDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is(404));
+        //User Not Found
+        mvc.perform(patch("/bookings/{bookingId}", bookingDto.getId())
+                        .header("X-Sharer-User-Id", owner.getId())
+                        .param("approved", "true")
+                        .content(mapper.writeValueAsString(bookingDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is(404));
+
+        //Status not Waiting
+        bookingDto.setStatus(BookingStatus.APPROVED);
+        mvc.perform(patch("/bookings/{bookingId}", bookingDto.getId())
+                        .header("X-Sharer-User-Id", bookingDto.getId())
+                        .param("approved", "true")
+                        .content(mapper.writeValueAsString(bookingDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is(404));
     }
 
     @Test
-    void get() {
+    void get() throws Exception {
+        when(bookingService.get(anyLong(), anyLong()))
+                .thenAnswer(invocationOnMock -> {
+                    Long bookingId = invocationOnMock.getArgument(0, Long.class);
+                    Long userId = invocationOnMock.getArgument(1, Long.class);
+                    if (!userId.equals(booker.getId())) {
+                        throw new NoSuchObjectException("");
+                    }
+                    if (bookingId.equals(bookingDto.getId())) {
+                        return bookingDto;
+                    }
+                    throw new NoSuchElementException();
+                });
+        mvc.perform(MockMvcRequestBuilders.get("/bookings/{bookingId}", bookingDto.getId())
+                        .header("X-Sharer-User-Id", booker.getId())
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.id", is(bookingDto.getItemId()), Long.class))
+                .andExpect(jsonPath("$.booker.id", is(bookingDto.getBooker().getId()), Long.class))
+                .andExpect(jsonPath("$.itemId", is(item.getId()), Long.class))
+                .andExpect(jsonPath("$.start", is(bookingDto.getStart().format(formatter)), LocalDateTime.class))
+                .andExpect(jsonPath("$.end", is(bookingDto.getEnd().format(formatter)), LocalDateTime.class))
+                .andExpect(jsonPath("$.status", is("WAITING")));
     }
 
     @Test
-    void getUserBookings() {
+    void getUserNotFound() throws Exception {
+        when(bookingService.get(anyLong(), anyLong()))
+                .thenAnswer(invocationOnMock -> {
+                    Long bookingId = invocationOnMock.getArgument(0, Long.class);
+                    Long userId = invocationOnMock.getArgument(1, Long.class);
+                    if (!userId.equals(booker.getId())) {
+                        throw new NoSuchObjectException("");
+                    }
+                    if (bookingId.equals(bookingDto.getId())) {
+                        return bookingDto;
+                    }
+                    throw new NoSuchElementException();
+                });
+        mvc.perform(MockMvcRequestBuilders.get("/bookings/{bookingId}", bookingDto.getId())
+                        .header("X-Sharer-User-Id", owner.getId())
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is(404));
     }
 
     @Test
-    void getOwnerBookings() {
+    void getUserBookingNotFound() throws Exception {
+        when(bookingService.get(anyLong(), anyLong()))
+                .thenAnswer(invocationOnMock -> {
+                    Long bookingId = invocationOnMock.getArgument(0, Long.class);
+                    Long userId = invocationOnMock.getArgument(1, Long.class);
+                    if (!userId.equals(booker.getId())) {
+                        throw new NoSuchObjectException("");
+                    }
+                    if (bookingId.equals(bookingDto.getId())) {
+                        return bookingDto;
+                    }
+                    throw new NoSuchObjectException("Booking not found");
+                });
+        mvc.perform(MockMvcRequestBuilders.get("/bookings/{bookingId}", 2L)
+                        .header("X-Sharer-User-Id", booker.getId())
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is(404));
+    }
+
+    @Test
+    void getUserBookings() throws Exception {
+        when(bookingService.getAllUserBookings(anyLong(), anyString(), anyInt(), anyInt()))
+                .thenReturn(List.of(bookingDto));
+
+        mvc.perform(MockMvcRequestBuilders.get("/bookings", bookingDto.getId())
+                        .header("X-Sharer-User-Id", booker.getId())
+                        .param("state", "WAITING")
+                        .param("from", "0")
+                        .param("from", "100")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.[0].id", is(bookingDto.getItemId()), Long.class))
+                .andExpect(jsonPath("$.[0].booker.id", is(bookingDto.getBooker().getId()), Long.class))
+                .andExpect(jsonPath("$.[0].itemId", is(item.getId()), Long.class))
+                .andExpect(jsonPath("$.[0].start", is(bookingDto.getStart().format(formatter)), LocalDateTime.class))
+                .andExpect(jsonPath("$.[0].end", is(bookingDto.getEnd().format(formatter)), LocalDateTime.class))
+                .andExpect(jsonPath("$.[0].status", is("WAITING")));
+    }
+
+    @Test
+    void getOwnerBookings() throws Exception {
+        when(bookingService.getAllOwnersBooking(anyLong(), anyString(), anyInt(), anyInt()))
+                .thenAnswer(invocationOnMock -> {
+                    Long userId = invocationOnMock.getArgument(0, Long.class);
+                    String state = invocationOnMock.getArgument(1, String.class);
+                    int from = invocationOnMock.getArgument(2, Integer.class);
+                    int size = invocationOnMock.getArgument(3, Integer.class);
+
+                    if ((from < 0 || size < 0) || (from == 0 && size == 0)) {
+                        throw new ItemsAvailabilityException("Invalid paging size");
+                    }
+                    if (from == -2) {
+                        return new ArrayList<>();
+                    }
+
+                    if (!userId.equals(booker.getId())) {
+                        throw new NoSuchObjectException("User not found");
+                    }
+                    if (state.equals(bookingDto.getStatus().toString()) || state.equals("ALL")) {
+                        return List.of(bookingDto);
+                    }
+                    throw new NoSuchObjectException("Bookings with State not found");
+                });
+
+        mvc.perform(MockMvcRequestBuilders.get("/bookings/owner", bookingDto.getId())
+                        .header("X-Sharer-User-Id", booker.getId())
+                        .param("state", "ALL")
+                        .param("from", "0")
+                        .param("size", "10")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.[0].id", is(bookingDto.getItemId()), Long.class))
+                .andExpect(jsonPath("$.[0].booker.id", is(bookingDto.getBooker().getId()), Long.class))
+                .andExpect(jsonPath("$.[0].itemId", is(item.getId()), Long.class))
+                .andExpect(jsonPath("$.[0].start", is(bookingDto.getStart().format(formatter)), LocalDateTime.class))
+                .andExpect(jsonPath("$.[0].end", is(bookingDto.getEnd().format(formatter)), LocalDateTime.class));
+    }
+
+
+    @Test
+    void getOwnerBookingsWaiting() throws Exception {
+        when(bookingService.getAllOwnersBooking(anyLong(), anyString(), anyInt(), anyInt()))
+                .thenAnswer(invocationOnMock -> {
+                    Long userId = invocationOnMock.getArgument(0, Long.class);
+                    String state = invocationOnMock.getArgument(1, String.class);
+                    int from = invocationOnMock.getArgument(2, Integer.class);
+                    int size = invocationOnMock.getArgument(3, Integer.class);
+
+                    if ((from < 0 || size < 0) || (from == 0 && size == 0)) {
+                        throw new ItemsAvailabilityException("Invalid paging size");
+                    }
+                    if (from == -2) {
+                        return new ArrayList<>();
+                    }
+
+                    if (!userId.equals(booker.getId())) {
+                        throw new NoSuchObjectException("User not found");
+                    }
+                    if (state.equals(bookingDto.getStatus().toString()) || state.equals("ALL")) {
+                        return List.of(bookingDto);
+                    }
+                    throw new NoSuchObjectException("Bookings with State not found");
+                });
+        bookingDto.setStatus(BookingStatus.WAITING);
+        mvc.perform(MockMvcRequestBuilders.get("/bookings/owner", bookingDto.getId())
+                        .header("X-Sharer-User-Id", booker.getId())
+                        .param("state", "WAITING")
+                        .param("from", "0")
+                        .param("size", "10")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.[0].id", is(bookingDto.getItemId()), Long.class))
+                .andExpect(jsonPath("$.[0].booker.id", is(bookingDto.getBooker().getId()), Long.class))
+                .andExpect(jsonPath("$.[0].itemId", is(item.getId()), Long.class))
+                .andExpect(jsonPath("$.[0].start", is(bookingDto.getStart().format(formatter)), LocalDateTime.class))
+                .andExpect(jsonPath("$.[0].end", is(bookingDto.getEnd().format(formatter)), LocalDateTime.class))
+                .andExpect(jsonPath("$.[0].status", is("WAITING")));
+    }
+
+    @Test
+    void getOwnerBookingsApproved() throws Exception {
+        when(bookingService.getAllOwnersBooking(anyLong(), anyString(), anyInt(), anyInt()))
+                .thenAnswer(invocationOnMock -> {
+                    Long userId = invocationOnMock.getArgument(0, Long.class);
+                    String state = invocationOnMock.getArgument(1, String.class);
+                    int from = invocationOnMock.getArgument(2, Integer.class);
+                    int size = invocationOnMock.getArgument(3, Integer.class);
+
+                    if ((from < 0 || size < 0) || (from == 0 && size == 0)) {
+                        throw new ItemsAvailabilityException("Invalid paging size");
+                    }
+                    if (from == -2) {
+                        return new ArrayList<>();
+                    }
+                    if (!userId.equals(booker.getId())) {
+                        throw new NoSuchObjectException("User not found");
+                    }
+                    if (state.equals(bookingDto.getStatus().toString()) || state.equals("ALL")) {
+                        return List.of(bookingDto);
+                    }
+
+                    throw new NoSuchObjectException("Bookings with State not found");
+                });
+        bookingDto.setStatus(BookingStatus.APPROVED);
+        mvc.perform(MockMvcRequestBuilders.get("/bookings/owner", bookingDto.getId())
+                        .header("X-Sharer-User-Id", booker.getId())
+                        .param("state", "APPROVED")
+                        .param("from", "0")
+                        .param("size", "10")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.[0].id", is(bookingDto.getItemId()), Long.class))
+                .andExpect(jsonPath("$.[0].booker.id", is(bookingDto.getBooker().getId()), Long.class))
+                .andExpect(jsonPath("$.[0].itemId", is(item.getId()), Long.class))
+                .andExpect(jsonPath("$.[0].start", is(bookingDto.getStart().format(formatter)), LocalDateTime.class))
+                .andExpect(jsonPath("$.[0].end", is(bookingDto.getEnd().format(formatter)), LocalDateTime.class))
+                .andExpect(jsonPath("$.[0].status", is("APPROVED")));
+    }
+
+    @Test
+    void getOwnerBookingsRejected() throws Exception {
+        when(bookingService.getAllOwnersBooking(anyLong(), anyString(), anyInt(), anyInt()))
+                .thenAnswer(invocationOnMock -> {
+                    Long userId = invocationOnMock.getArgument(0, Long.class);
+                    String state = invocationOnMock.getArgument(1, String.class);
+                    int from = invocationOnMock.getArgument(2, Integer.class);
+                    int size = invocationOnMock.getArgument(3, Integer.class);
+
+                    if ((from < 0 || size < 0) || (from == 0 && size == 0)) {
+                        throw new ItemsAvailabilityException("Invalid paging size");
+                    }
+                    if (from == -2) {
+                        return new ArrayList<>();
+                    }
+
+                    if (!userId.equals(booker.getId())) {
+                        throw new NoSuchObjectException("User not found");
+                    }
+                    if (state.equals(bookingDto.getStatus().toString()) || state.equals("ALL")) {
+                        return List.of(bookingDto);
+                    }
+                    throw new NoSuchObjectException("Bookings with State not found");
+                });
+        bookingDto.setStatus(BookingStatus.REJECTED);
+        mvc.perform(MockMvcRequestBuilders.get("/bookings/owner", bookingDto.getId())
+                        .header("X-Sharer-User-Id", booker.getId())
+                        .param("state", "REJECTED")
+                        .param("from", "0")
+                        .param("size", "10")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.[0].id", is(bookingDto.getItemId()), Long.class))
+                .andExpect(jsonPath("$.[0].booker.id", is(bookingDto.getBooker().getId()), Long.class))
+                .andExpect(jsonPath("$.[0].itemId", is(item.getId()), Long.class))
+                .andExpect(jsonPath("$.[0].start", is(bookingDto.getStart().format(formatter)), LocalDateTime.class))
+                .andExpect(jsonPath("$.[0].end", is(bookingDto.getEnd().format(formatter)), LocalDateTime.class))
+                .andExpect(jsonPath("$.[0].status", is("REJECTED")));
+    }
+
+    @Test
+    void getOwnerBookingsCancelled() throws Exception {
+        when(bookingService.getAllOwnersBooking(anyLong(), anyString(), anyInt(), anyInt()))
+                .thenAnswer(invocationOnMock -> {
+                    Long userId = invocationOnMock.getArgument(0, Long.class);
+                    String state = invocationOnMock.getArgument(1, String.class);
+                    int from = invocationOnMock.getArgument(2, Integer.class);
+                    int size = invocationOnMock.getArgument(3, Integer.class);
+
+                    if ((from < 0 || size < 0) || (from == 0 && size == 0)) {
+                        throw new ItemsAvailabilityException("Invalid paging size");
+                    }
+                    if (from == -2) {
+                        return new ArrayList<>();
+                    }
+
+                    if (!userId.equals(booker.getId())) {
+                        throw new NoSuchObjectException("User not found");
+                    }
+                    if (state.equals(bookingDto.getStatus().toString()) || state.equals("ALL")) {
+                        return List.of(bookingDto);
+                    }
+                    throw new NoSuchObjectException("Bookings with State not found");
+                });
+        bookingDto.setStatus(BookingStatus.CANCELLED);
+        mvc.perform(MockMvcRequestBuilders.get("/bookings/owner", bookingDto.getId())
+                        .header("X-Sharer-User-Id", booker.getId())
+                        .param("state", "CANCELLED")
+                        .param("from", "0")
+                        .param("size", "10")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.[0].id", is(bookingDto.getItemId()), Long.class))
+                .andExpect(jsonPath("$.[0].booker.id", is(bookingDto.getBooker().getId()), Long.class))
+                .andExpect(jsonPath("$.[0].itemId", is(item.getId()), Long.class))
+                .andExpect(jsonPath("$.[0].start", is(bookingDto.getStart().format(formatter)), LocalDateTime.class))
+                .andExpect(jsonPath("$.[0].end", is(bookingDto.getEnd().format(formatter)), LocalDateTime.class))
+                .andExpect(jsonPath("$.[0].status", is("CANCELLED")));
+    }
+
+    @Test
+    void getOwnerBookingsWrongPaging() throws Exception {
+        when(bookingService.getAllOwnersBooking(anyLong(), anyString(), anyInt(), anyInt()))
+                .thenAnswer(invocationOnMock -> {
+                    Long userId = invocationOnMock.getArgument(0, Long.class);
+                    String state = invocationOnMock.getArgument(1, String.class);
+                    int from = invocationOnMock.getArgument(2, Integer.class);
+                    int size = invocationOnMock.getArgument(3, Integer.class);
+
+                    if ((from < 0 || size < 0) || (from == 0 && size == 0)) {
+                        throw new ItemsAvailabilityException("Invalid paging size");
+                    }
+                    if (from == -2) {
+                        return new ArrayList<>();
+                    }
+
+                    if (!userId.equals(booker.getId())) {
+                        throw new NoSuchObjectException("User not found");
+                    }
+                    if (state.equals(bookingDto.getStatus().toString()) || state.equals("ALL")) {
+                        return List.of(bookingDto);
+                    }
+                    throw new NoSuchObjectException("Bookings with State not found");
+                });
+        bookingDto.setStatus(BookingStatus.CANCELLED);
+        mvc.perform(MockMvcRequestBuilders.get("/bookings/owner", bookingDto.getId())
+                        .header("X-Sharer-User-Id", booker.getId())
+                        .param("state", "CANCELLED")
+                        .param("from", "0")
+                        .param("size", "0")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is(400));
     }
 }
