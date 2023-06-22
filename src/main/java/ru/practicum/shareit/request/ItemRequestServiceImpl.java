@@ -2,10 +2,8 @@ package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.exception.ItemsAvailabilityException;
 import ru.practicum.shareit.exception.NoSuchObjectException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.ItemRepository;
@@ -45,8 +43,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         List<ItemRequestDto> requestDtos = new ArrayList<>();
         for(ItemRequest ir : itemRequests) {
             ItemRequestDto dto = ItemRequestMapper.requestToDto(itemRequests.get(from));
-            if (ir.getItemId() != null) {
-                Item item = itemRepository.findById(ir.getItemId()).get();
+            if (ir.getItem() != null) {
+                Item item = itemRepository.findById(ir.getItem().getId()).get();
                 dto.getItems().add(item);
             }
             requestDtos.add(dto);
@@ -60,7 +58,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         ItemRequest itemRequest = requestRepository.findById(requestId).orElseThrow(() ->
                 new NoSuchObjectException("Request has not found."));
         ItemRequestDto itemRequestDto = ItemRequestMapper.requestToDto(itemRequest);
-        itemRequestDto.getItems().add(itemRepository.findById(itemRequest.getItemId()).get());
+        itemRequestDto.getItems().add(itemRepository.findById(itemRequest.getItem().getId()).get());
         return itemRequestDto;
     }
 
@@ -70,8 +68,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         List<ItemRequestDto> requestDtos = new ArrayList<>();
             for(ItemRequest ir : itemRequests) {
             ItemRequestDto dto = ItemRequestMapper.requestToDto(ir);
-            if(ir.getItemId() != null) {
-                Item item = itemRepository.findById(ir.getItemId()).get();
+            if(ir.getItem() != null) {
+                Item item = itemRepository.findById(ir.getItem().getId()).get();
                 dto.getItems().add(item);
             }
             requestDtos.add(dto);

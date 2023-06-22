@@ -147,7 +147,7 @@ class ItemRequestServiceImplTest {
                 .thenReturn(Optional.ofNullable(user));
         when(mockRequestRepository.findAllByRequesterId(anyLong(), any(Pageable.class)))
                 .thenReturn(List.of(itemRequest));
-        itemRequest.setItemId(null);
+        itemRequest.setItem(null);
         List<ItemRequestDto> list = requestService.getUsersAll(user.getId(), 0, 10);
         assertEquals(list.size(), 1);
         assertEquals(list.get(0).getItems().isEmpty(), true);
@@ -245,7 +245,7 @@ class ItemRequestServiceImplTest {
     void getOtherIsNull() {
         when(mockRequestRepository.findAllByRequesterIdIsNot(anyLong()))
                 .thenReturn(List.of(itemRequest));
-        itemRequest.setItemId(null);
+        itemRequest.setItem(null);
         List<ItemRequestDto> itemRequestDtos = requestService.getOtherRequest(user.getId(), 0, 10);
         assertEquals(itemRequestDtos.get(0).getItems().isEmpty(), true);
     }
