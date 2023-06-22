@@ -1,6 +1,8 @@
 package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.ItemsAvailabilityException;
@@ -35,23 +37,18 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public List<ItemRequestDto> getUsersAll(Long userId, int from, int size) {
         userRepository.findById(userId).orElseThrow(() -> new NoSuchObjectException("User has not found."));
-        List<ItemRequest> itemRequests = requestRepository.findAllByRequesterId(userId);
+        List<ItemRequest> itemRequests = requestRepository.findAllByRequesterId(userId, PageRequest.of(from, size));
         if (itemRequests.isEmpty()) {
             return new ArrayList<>();
         }
         List<ItemRequestDto> requestDtos = new ArrayList<>();
-        int maxSize = itemRequests.size();
-        maxSize = maxSize > size ? size : maxSize;
-        int step = 0;
-        while (step < maxSize) {
+        for(ItemRequest ir : itemRequests) {
             ItemRequestDto dto = ItemRequestMapper.requestToDto(itemRequests.get(from));
-            if (itemRequests.get(from).getItemId() != null) {
-                Item item = itemRepository.findById(itemRequests.get(from).getItemId()).get();
+            if (ir.getItemId() != null) {
+                Item item = itemRepository.findById(ir.getItemId()).get();
                 dto.getItems().add(item);
             }
             requestDtos.add(dto);
-            from++;
-            step++;
         }
         return requestDtos;
     }
