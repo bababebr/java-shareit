@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.dto.ItemBookingHistoryDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.User;
 
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ public final class ItemMapper {
                 item.getName(),
                 item.getDescription(),
                 item.getAvailable(),
-                item.getRequestId());
+                null);
     }
 
     public static ItemBookingHistoryDto itemBookingHistoryDto(Item item) {
@@ -27,7 +28,7 @@ public final class ItemMapper {
                 null,
                 null,
                 new ArrayList<>(),
-                item.getRequestId());
+                null);
     }
 
     public static Item dtoToItem(ItemDto itemDto, User owner) {
@@ -35,7 +36,6 @@ public final class ItemMapper {
                 owner,
                 itemDto.getAvailable(),
                 itemDto.getDescription(),
-                itemDto.getName(),
-                itemDto.getRequestId());
+                itemDto.getName());
     }
 }
