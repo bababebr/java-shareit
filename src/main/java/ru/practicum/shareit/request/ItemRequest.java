@@ -23,7 +23,7 @@ public class ItemRequest {
     String description;
     LocalDateTime created;
     @Column(name = "Requester_id")
-    Long requesterID;
+    Long requesterId;
     @Column(name = "Item_id")
     Long itemId = null;
 }

@@ -6,8 +6,8 @@ import java.util.List;
 
 public interface RequestRepository extends JpaRepository<ItemRequest, Long> {
 
-    List<ItemRequest> findAllByUserId(Long userId);
+    List<ItemRequest> findAllByRequesterId(Long userId);
 
-    List<ItemRequest> findAllByUserIdIsNot(Long userId);
+    List<ItemRequest> findAllByRequesterIdIsNot(Long userId);
 
 }
