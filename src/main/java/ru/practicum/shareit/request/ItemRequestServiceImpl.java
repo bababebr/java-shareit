@@ -65,20 +65,15 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public List<ItemRequestDto> getOtherRequest(Long userId, int from, int size) {
-        List<ItemRequest> itemRequests = requestRepository.findAllByRequesterIdIsNot(userId);
+        List<ItemRequest> itemRequests = requestRepository.findAllByRequesterIdIsNot(userId, PageRequest.of(from, size));
         List<ItemRequestDto> requestDtos = new ArrayList<>();
-        int maxSize = itemRequests.size();
-        maxSize = maxSize > size ? size : maxSize;
-        int step = 0;
-        while (step < maxSize) {
-            ItemRequestDto dto = ItemRequestMapper.requestToDto(itemRequests.get(from));
-            if (itemRequests.get(from).getItemId() != null) {
-                Item item = itemRepository.findById(itemRequests.get(from).getItemId()).get();
+            for(ItemRequest ir : itemRequests) {
+            ItemRequestDto dto = ItemRequestMapper.requestToDto(ir);
+            if(ir.getItemId() != null) {
+                Item item = itemRepository.findById(ir.getItemId()).get();
                 dto.getItems().add(item);
             }
             requestDtos.add(dto);
-            from++;
-            step++;
         }
         return requestDtos;
     }

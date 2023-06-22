@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.exception.ItemsAvailabilityException;
 import ru.practicum.shareit.exception.NoSuchObjectException;
 import ru.practicum.shareit.item.model.Item;
@@ -134,7 +135,7 @@ class ItemRequestServiceImplTest {
     void getUsersAllEmpty() {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(mockRequestRepository.findAllByRequesterId(anyLong()))
+        when(mockRequestRepository.findAllByRequesterId(anyLong(), any(Pageable.class)))
                 .thenReturn(new ArrayList<>());
         List list = requestService.getUsersAll(user.getId(), 1, 10);
         assertEquals(list.size(), 0);
@@ -144,7 +145,7 @@ class ItemRequestServiceImplTest {
     void getUsersAllItemIsNull() {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(mockRequestRepository.findAllByRequesterId(anyLong()))
+        when(mockRequestRepository.findAllByRequesterId(anyLong(), any(Pageable.class)))
                 .thenReturn(List.of(itemRequest));
         itemRequest.setItemId(null);
         List<ItemRequestDto> list = requestService.getUsersAll(user.getId(), 0, 10);
@@ -160,7 +161,7 @@ class ItemRequestServiceImplTest {
     void getUsersAllIteNotNull() {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(mockRequestRepository.findAllByRequesterId(anyLong()))
+        when(mockRequestRepository.findAllByRequesterId(anyLong(), any(Pageable.class)))
                 .thenReturn(List.of(itemRequest));
         when(mockItemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
