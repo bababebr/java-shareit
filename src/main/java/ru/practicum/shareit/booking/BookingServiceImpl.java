@@ -1,6 +1,8 @@
 package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -14,6 +16,7 @@ import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -72,7 +75,7 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDto> get(Long userId) {
         userRepository.findById(userId).orElseThrow(()
                 -> new NoSuchObjectException(String.format("User with ID=%s not found", userId)));
-        return BookingMapper.bookingDtos(bookingRepository.findByBooker_IdOrderByStartDesc(userId));
+        return BookingMapper.bookingDtos(bookingRepository.findByBooker_IdOrderByStartDesc(userId, Pageable.unpaged()));
     }
 
     @Override
@@ -80,85 +83,39 @@ public class BookingServiceImpl implements BookingService {
         userRepository.findById(userId).orElseThrow(()
                 -> new NoSuchObjectException(String.format("User with ID=%s not found", userId)));
         List<BookingDto> bookingDtos;
-        List<BookingDto> returnList = new ArrayList<>();
-        int step = 0;
-        int maxSize;
         switch (status) {
             case "ALL":
-                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdOrderByStartDesc(userId));
-                maxSize = bookingDtos.size();
-                maxSize = maxSize > size ? size : maxSize;
-                maxSize = maxSize > (bookingDtos.size() - from) ? bookingDtos.size() - from : maxSize;
-                while (step < maxSize) {
-                    returnList.add(bookingDtos.get(from));
-                    from++;
-                    step++;
-                }
-                return returnList;
+                PageRequest pageRequest = PageRequest.of(from, size);
+                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdOrderByStartDesc(userId,
+                        pageRequest));
+                return bookingDtos;
             case "APPROVED":
-                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdAndState(userId, BookingStatus.APPROVED));
-                maxSize = bookingDtos.size();
-                maxSize = maxSize > size ? size : maxSize;
-                while (step < maxSize) {
-                    returnList.add(bookingDtos.get(from));
-                    from++;
-                    step++;
-                }
-                return returnList;
+                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdAndState(userId,
+                        BookingStatus.APPROVED, PageRequest.of(from, size)));
+                return bookingDtos;
             case "REJECTED":
-                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdAndState(userId, BookingStatus.REJECTED));
-                maxSize = bookingDtos.size();
-                maxSize = maxSize > size ? size : maxSize;
-                while (step < maxSize) {
-                    returnList.add(bookingDtos.get(from));
-                    from++;
-                    step++;
-                }
-                return returnList;
+                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdAndState(userId
+                        , BookingStatus.REJECTED, PageRequest.of(from, size)));
+                return bookingDtos;
             case "WAITING":
-                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdAndState(userId, BookingStatus.WAITING));
-                maxSize = bookingDtos.size();
-                maxSize = maxSize > size ? size : maxSize;
-                while (step < maxSize) {
-                    returnList.add(bookingDtos.get(from));
-                    from++;
-                    step++;
-                }
-                return returnList;
+                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdAndState(userId,
+                        BookingStatus.WAITING, PageRequest.of(from, size)));
+                return bookingDtos;
             case "CURRENT":
-                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdAndEndIsAfterAndStartIsBefore(userId, LocalDateTime.now(), LocalDateTime.now()));
-                maxSize = bookingDtos.size();
-                maxSize = maxSize > size ? size : maxSize;
-                while (step < maxSize) {
-                    returnList.add(bookingDtos.get(from));
-                    from++;
-                    step++;
-                }
-                return returnList;
+                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdAndEndIsAfterAndStartIsBefore(
+                        userId, LocalDateTime.now(), LocalDateTime.now(), PageRequest.of(from, size)));
+                return bookingDtos;
             case "PAST":
-                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now()));
-                maxSize = bookingDtos.size();
-                maxSize = maxSize > size ? size : maxSize;
-                while (step < maxSize) {
-                    returnList.add(bookingDtos.get(from));
-                    from++;
-                    step++;
-                }
-                return returnList;
+                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdAndEndIsBeforeOrderByStartDesc(
+                        userId, LocalDateTime.now(), PageRequest.of(from, size)));
+                return bookingDtos;
             case "FUTURE":
-                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now()));
-                maxSize = bookingDtos.size();
-                maxSize = maxSize > size ? size : maxSize;
-                while (step < maxSize) {
-                    returnList.add(bookingDtos.get(from));
-                    from++;
-                    step++;
-                }
-                return returnList;
+                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdAndStartIsAfterOrderByStartDesc(
+                        userId, LocalDateTime.now(), PageRequest.of(from, size)));
+                return bookingDtos;
             default:
                 throw new StateException("UNKNOWN_STATE");
         }
-
     }
 
     @Override
@@ -166,80 +123,37 @@ public class BookingServiceImpl implements BookingService {
         userRepository.findById(userId).orElseThrow(()
                 -> new NoSuchObjectException(String.format("User with ID=%s not found", userId)));
         List<BookingDto> bookingDtos;
-        List<BookingDto> returnList = new ArrayList<>();
-        int step = 0;
-        int maxSize;
         switch (state) {
             case "ALL":
-                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByItem_OwnerIdOrderByStartDesc(userId));
-                maxSize = bookingDtos.size();
-                maxSize = maxSize > size ? size : maxSize;
-                while (step < maxSize) {
-                    returnList.add(bookingDtos.get(from));
-                    from++;
-                    step++;
-                }
-                return returnList;
+                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByItem_OwnerIdOrderByStartDesc(userId,
+                        PageRequest.of(from, size)));
+                return bookingDtos;
             case "APPROVED":
-                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByItem_OwnerIdAndState(userId, BookingStatus.APPROVED));
-                maxSize = bookingDtos.size();
-                maxSize = maxSize > size ? size : maxSize;
-                while (step < maxSize) {
-                    returnList.add(bookingDtos.get(step));
-                    from++;
-                    step++;
-                }
-                return returnList;
+                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByItem_OwnerIdAndState(userId,
+                        BookingStatus.APPROVED, PageRequest.of(from, size)));
+                return bookingDtos;
             case "REJECTED":
-                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByItem_OwnerIdAndState(userId, BookingStatus.REJECTED));
-                maxSize = bookingDtos.size();
-                maxSize = maxSize > size ? size : maxSize;
-                while (step < maxSize) {
-                    returnList.add(bookingDtos.get(step));
-                    from++;
-                    step++;
-                }
-                return returnList;
+                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByItem_OwnerIdAndState(userId,
+                        BookingStatus.REJECTED, PageRequest.of(from, size)));
+                return bookingDtos;
             case "WAITING":
-                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByItem_OwnerIdAndState(userId, BookingStatus.WAITING));
-                maxSize = bookingDtos.size();
-                maxSize = maxSize > size ? size : maxSize;
-                while (step < maxSize) {
-                    returnList.add(bookingDtos.get(step));
-                    from++;
-                    step++;
-                }
-                return returnList;
+                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByItem_OwnerIdAndState(userId,
+                        BookingStatus.WAITING, PageRequest.of(from, size)));
+                return bookingDtos;
             case "CURRENT":
-                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByItem_OwnerIdAndEndIsAfterAndStartIsBefore(userId, LocalDateTime.now(), LocalDateTime.now()));
-                maxSize = bookingDtos.size();
-                maxSize = maxSize > size ? size : maxSize;
-                while (step < maxSize) {
-                    returnList.add(bookingDtos.get(step));
-                    from++;
-                    step++;
-                }
-                return returnList;
+                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByItem_OwnerIdAndEndIsAfterAndStartIsBefore(
+                        userId, LocalDateTime.now(), LocalDateTime.now(), PageRequest.of(from, size)));
+                return bookingDtos;
             case "PAST":
-                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByItem_OwnerIdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now()));
-                maxSize = bookingDtos.size();
-                maxSize = maxSize > size ? size : maxSize;
-                while (step < maxSize) {
-                    returnList.add(bookingDtos.get(step));
-                    from++;
-                    step++;
-                }
-                return returnList;
+                bookingDtos = BookingMapper.bookingDtos(bookingRepository.
+                        findByItem_OwnerIdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now(),
+                                PageRequest.of(from, size)));
+                return bookingDtos;
             case "FUTURE":
-                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByItem_OwnerIdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now()));
-                maxSize = bookingDtos.size();
-                maxSize = maxSize > size ? size : maxSize;
-                while (step < maxSize) {
-                    returnList.add(bookingDtos.get(step));
-                    from++;
-                    step++;
-                }
-                return returnList;
+                bookingDtos = BookingMapper.bookingDtos(bookingRepository.
+                        findByItem_OwnerIdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now(),
+                                PageRequest.of(from, size)));
+                return bookingDtos;
             default:
                 throw new StateException("UNKNOWN_STATE");
         }
