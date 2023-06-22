@@ -36,12 +36,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public List<ItemRequestDto> getUsersAll(Long userId, int from, int size) {
         userRepository.findById(userId).orElseThrow(() -> new NoSuchObjectException("User has not found."));
         List<ItemRequest> itemRequests = requestRepository.findAllByRequesterId(userId);
-        if (from == -2) {
-            return new ArrayList<>();
-        }
-        if ((from < 0 || size < 0) || (from == 0 && size == 0)) {
-            throw new ItemsAvailabilityException("Invalid paging size");
-        }
         if (itemRequests.isEmpty()) {
             return new ArrayList<>();
         }
@@ -74,13 +68,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public List<ItemRequestDto> getOtherRequest(Long userId, int from, int size) {
-
-        if (from == -2) {
-            return new ArrayList<>();
-        }
-        if ((from < 0 || size < 0) || (from == 0 && size == 0)) {
-            throw new ItemsAvailabilityException("Invalid paging size");
-        }
         List<ItemRequest> itemRequests = requestRepository.findAllByRequesterIdIsNot(userId);
         List<ItemRequestDto> requestDtos = new ArrayList<>();
         int maxSize = itemRequests.size();

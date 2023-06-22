@@ -79,13 +79,6 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDto> getAllUserBookings(Long userId, String status, int from, int size) {
         userRepository.findById(userId).orElseThrow(()
                 -> new NoSuchObjectException(String.format("User with ID=%s not found", userId)));
-        if (from == -2) {
-            return new ArrayList<>();
-        }
-
-        if ((from < 0 || size < 0) || (from == 0 && size == 0)) {
-            throw new ItemsAvailabilityException("Invalid paging size");
-        }
         List<BookingDto> bookingDtos;
         List<BookingDto> returnList = new ArrayList<>();
         int step = 0;
@@ -172,13 +165,6 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDto> getAllOwnersBooking(Long userId, String state, int from, int size) {
         userRepository.findById(userId).orElseThrow(()
                 -> new NoSuchObjectException(String.format("User with ID=%s not found", userId)));
-        if (from == -2) {
-            return new ArrayList<>();
-        }
-
-        if ((from < 0 || size < 0) || (from == 0 && size == 0)) {
-            throw new ItemsAvailabilityException("Invalid paging size");
-        }
         List<BookingDto> bookingDtos;
         List<BookingDto> returnList = new ArrayList<>();
         int step = 0;
