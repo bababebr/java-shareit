@@ -22,8 +22,8 @@ public class ItemRequest {
     Long id;
     String description;
     LocalDateTime created;
-    @Column(name = "User_id")
-    Long userId;
+    @Column(name = "Requester_id")
+    Long requesterID;
     @Column(name = "Item_id")
     Long itemId = null;
 }

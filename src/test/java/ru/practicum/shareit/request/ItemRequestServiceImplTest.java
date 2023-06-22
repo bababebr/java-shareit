@@ -32,17 +32,16 @@ import static org.mockito.Mockito.when;
 @Transactional
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@ExtendWith(MockitoExtension.class)
 class ItemRequestServiceImplTest {
 
     @InjectMocks
     ItemRequestServiceImpl requestService;
     @Mock
-    RequestRepository requestRepository;
+    RequestRepository mockRequestRepository;
     @Mock
-    ItemRepository itemRepository;
+    ItemRepository mockItemRepository;
     @Mock
-    UserRepository userRepository;
+    UserRepository mockUserRepository;
     private ItemRequestDto itemRequestDto;
     private ItemRequest itemRequest;
     private Item item;
@@ -54,7 +53,7 @@ class ItemRequestServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        requestService = new ItemRequestServiceImpl(requestRepository, itemRepository, userRepository);
+        requestService = new ItemRequestServiceImpl(mockRequestRepository, mockItemRepository, mockUserRepository);
         user = User.create(1L, "user", "user@mail.ru");
 
         owner = User.create(2L, "owner", "owner@mail.ru");
@@ -69,7 +68,7 @@ class ItemRequestServiceImplTest {
 
     @Test
     void addItemUserNotFound() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenThrow(new NoSuchObjectException("Not found"));
         final NoSuchObjectException e = assertThrows(NoSuchObjectException.class,
                 () -> requestService.addItem(itemRequestDto, user.getId()));
@@ -78,20 +77,20 @@ class ItemRequestServiceImplTest {
 
     @Test
     void addItem() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(requestRepository.save(any(ItemRequest.class)))
+        when(mockRequestRepository.save(any(ItemRequest.class)))
                 .thenReturn(itemRequest);
         ItemRequestDto dto = requestService.addItem(itemRequestDto, user.getId());
         assertEquals(itemRequest.getId(), dto.getId());
         assertEquals(itemRequest.getCreated(), dto.getCreated());
         assertEquals(itemRequest.getDescription(), dto.getDescription());
-        assertEquals(itemRequest.getUserId(), dto.getUserId());
+        assertEquals(itemRequest.getRequesterID(), dto.getRequesterId());
     }
 
     @Test
     void getUsersAllUserNotFound() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenThrow(new NoSuchObjectException("Not found"));
         final NoSuchObjectException e = assertThrows(NoSuchObjectException.class,
                 () -> requestService.getUsersAll(user.getId(), 0, 10));
@@ -100,7 +99,7 @@ class ItemRequestServiceImplTest {
 
     @Test
     void getUsersAllSizeMinus2() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
         List list = requestService.getUsersAll(user.getId(), -2, 10);
         assertEquals(list.size(), 0);
@@ -108,7 +107,7 @@ class ItemRequestServiceImplTest {
 
     @Test
     void getUsersAllFromNegative() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
         final ItemsAvailabilityException e = assertThrows(ItemsAvailabilityException.class,
                 () -> requestService.getUsersAll(user.getId(), -10, 10));
@@ -117,7 +116,7 @@ class ItemRequestServiceImplTest {
 
     @Test
     void getUsersAllSizeNegative() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
         final ItemsAvailabilityException e = assertThrows(ItemsAvailabilityException.class,
                 () -> requestService.getUsersAll(user.getId(), 10, -10));
@@ -126,7 +125,7 @@ class ItemRequestServiceImplTest {
 
     @Test
     void getUsersAllSizeAndFromZeros() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
         final ItemsAvailabilityException e = assertThrows(ItemsAvailabilityException.class,
                 () -> requestService.getUsersAll(user.getId(), 0, 0));
@@ -135,9 +134,9 @@ class ItemRequestServiceImplTest {
 
     @Test
     void getUsersAllEmpty() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(requestRepository.findAllByUserId(anyLong()))
+        when(mockRequestRepository.findAllByUserId(anyLong()))
                 .thenReturn(new ArrayList<>());
         List list = requestService.getUsersAll(user.getId(), 1, 10);
         assertEquals(list.size(), 0);
@@ -145,33 +144,33 @@ class ItemRequestServiceImplTest {
 
     @Test
     void getUsersAllItemIsNull() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(requestRepository.findAllByUserId(anyLong()))
+        when(mockRequestRepository.findAllByUserId(anyLong()))
                 .thenReturn(List.of(itemRequest));
         itemRequest.setItemId(null);
         List<ItemRequestDto> list = requestService.getUsersAll(user.getId(), 0, 10);
         assertEquals(list.size(), 1);
         assertEquals(list.get(0).getItems().isEmpty(), true);
         assertEquals(list.get(0).getId(), itemRequest.getId());
-        assertEquals(list.get(0).getUserId(), itemRequest.getUserId());
+        assertEquals(list.get(0).getRequesterId(), itemRequest.getRequesterID());
         assertEquals(list.get(0).getDescription(), itemRequest.getDescription());
         assertEquals(list.get(0).getCreated(), itemRequest.getCreated());
     }
 
     @Test
     void getUsersAllIteNotNull() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(requestRepository.findAllByUserId(anyLong()))
+        when(mockRequestRepository.findAllByUserId(anyLong()))
                 .thenReturn(List.of(itemRequest));
-        when(itemRepository.findById(anyLong()))
+        when(mockItemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
         List<ItemRequestDto> list = requestService.getUsersAll(user.getId(), 0, 10);
         assertEquals(list.size(), 1);
         assertEquals(list.get(0).getItems().isEmpty(), false);
         assertEquals(list.get(0).getId(), itemRequest.getId());
-        assertEquals(list.get(0).getUserId(), itemRequest.getUserId());
+        assertEquals(list.get(0).getRequesterId(), itemRequest.getRequesterID());
         assertEquals(list.get(0).getDescription(), itemRequest.getDescription());
         assertEquals(list.get(0).getCreated(), itemRequest.getCreated());
     }
@@ -179,7 +178,7 @@ class ItemRequestServiceImplTest {
 
     @Test
     void getUserNotFound() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenThrow(new NoSuchObjectException("Not found"));
         final NoSuchObjectException e = assertThrows(NoSuchObjectException.class,
                 () -> requestService.get(user.getId(), itemRequestDto.getId()));
@@ -188,11 +187,11 @@ class ItemRequestServiceImplTest {
 
     @Test
     void getItemNotFound() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(requestRepository.findById(anyLong()))
+        when(mockRequestRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(itemRequest));
-        when(itemRepository.findById(anyLong()))
+        when(mockItemRepository.findById(anyLong()))
                 .thenThrow(new NoSuchObjectException("Request has not found."));
         final NoSuchObjectException e = assertThrows(NoSuchObjectException.class,
                 () -> requestService.get(user.getId(), itemRequestDto.getId()));
@@ -202,18 +201,18 @@ class ItemRequestServiceImplTest {
     @Test
     void get() {
         itemRequestDto.getItems().add(item);
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(requestRepository.findById(anyLong()))
+        when(mockRequestRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(itemRequest));
-        when(itemRepository.findById(anyLong()))
+        when(mockItemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
         ItemRequestDto request = requestService.get(user.getId(), itemRequest.getId());
         assertEquals(itemRequestDto.getItems(), request.getItems());
         assertEquals(itemRequestDto.getId(), request.getId());
         assertEquals(itemRequestDto.getCreated(), request.getCreated());
         assertEquals(itemRequestDto.getDescription(), request.getDescription());
-        assertEquals(itemRequestDto.getUserId(), request.getUserId());
+        assertEquals(itemRequestDto.getRequesterId(), request.getRequesterId());
     }
 
     @Test
@@ -245,7 +244,7 @@ class ItemRequestServiceImplTest {
 
     @Test
     void getOtherIsNull() {
-        when(requestRepository.findAllForOtherUsers(anyLong()))
+        when(mockRequestRepository.findAllByUserIdIsNot(anyLong()))
                 .thenReturn(List.of(itemRequest));
         itemRequest.setItemId(null);
         List<ItemRequestDto> itemRequestDtos = requestService.getOtherRequest(user.getId(), 0, 10);
@@ -254,9 +253,9 @@ class ItemRequestServiceImplTest {
 
     @Test
     void getOther() {
-        when(requestRepository.findAllForOtherUsers(anyLong()))
+        when(mockRequestRepository.findAllByUserIdIsNot(anyLong()))
                 .thenReturn(List.of(itemRequest));
-        when(itemRepository.findById(anyLong()))
+        when(mockItemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
         List<ItemRequestDto> itemRequestDtos = requestService.getOtherRequest(user.getId(), 0, 10);
         assertEquals(itemRequestDtos.get(0).getItems().size(), 1);

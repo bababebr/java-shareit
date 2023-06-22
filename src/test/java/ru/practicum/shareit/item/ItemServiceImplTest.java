@@ -41,20 +41,19 @@ import static org.mockito.Mockito.when;
 @Transactional
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@ExtendWith(MockitoExtension.class)
 class ItemServiceImplTest {
     @InjectMocks
     ItemServiceImpl itemService;
     @Mock
-    ItemRepository itemRepository;
+    ItemRepository mockItemRepository;
     @Mock
-    UserRepository userRepository;
+    UserRepository mockUserRepository;
     @Mock
-    CommentRepository commentRepository;
+    CommentRepository mockCommentRepository;
     @Mock
-    BookingRepository bookingRepository;
+    BookingRepository mockBookingRepository;
     @Mock
-    RequestRepository requestRepository;
+    RequestRepository mockRequestRepository;
     private Item item1;
     private Item item2;
     private ItemDto itemDto1;
@@ -66,8 +65,8 @@ class ItemServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        itemService = new ItemServiceImpl(itemRepository, userRepository, bookingRepository,
-                commentRepository, requestRepository);
+        itemService = new ItemServiceImpl(mockItemRepository, mockUserRepository, mockBookingRepository,
+                mockCommentRepository, mockRequestRepository);
         owner = User.create(1L, "owner", "owner@mail.ru");
         booker = User.create(2L, "booker", "booker@mail.ru");
         item1 = Item.create(1L, owner, true, "item 1", "item 1", null);
@@ -82,9 +81,9 @@ class ItemServiceImplTest {
 
     @Test
     void addItem() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(owner));
-        when(itemRepository.save(any(Item.class)))
+        when(mockItemRepository.save(any(Item.class)))
                 .thenReturn(item1);
         ItemDto returnItem = itemService.addItem(itemDto1, owner.getId());
         assertEquals(returnItem.getId(), itemDto1.getId());
@@ -96,7 +95,7 @@ class ItemServiceImplTest {
 
     @Test
     void addItemWithOwnerNotExist() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenThrow(NoSuchObjectException.class);
         final NoSuchObjectException exception = assertThrows(
                 NoSuchObjectException.class,
@@ -105,9 +104,9 @@ class ItemServiceImplTest {
 
     @Test
     void addItemNull() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(owner));
-        when(itemRepository.save(any(Item.class)))
+        when(mockItemRepository.save(any(Item.class)))
                 .thenReturn(null);
         final NullPointerException exception = assertThrows(
                 NullPointerException.class,
@@ -116,11 +115,11 @@ class ItemServiceImplTest {
 
     @Test
     void updateItem() {
-        when(itemRepository.existsById(anyLong()))
+        when(mockItemRepository.existsById(anyLong()))
                 .thenReturn(true);
-        when(itemRepository.findById(anyLong()))
+        when(mockItemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item1));
-        when(itemRepository.save(any(Item.class)))
+        when(mockItemRepository.save(any(Item.class)))
                 .thenReturn(item1);
         ItemDto returnItem = itemService.updateItem(itemDto1, owner.getId(), itemDto1.getId());
         assertEquals(returnItem.getId(), itemDto1.getId());
@@ -132,7 +131,7 @@ class ItemServiceImplTest {
 
     @Test
     void updateItemNotExist() {
-        when(itemRepository.existsById(anyLong()))
+        when(mockItemRepository.existsById(anyLong()))
                 .thenReturn(false);
         final NoSuchObjectException exception = assertThrows(
                 NoSuchObjectException.class,
@@ -141,7 +140,7 @@ class ItemServiceImplTest {
 
     @Test
     void getItem() {
-        when(itemRepository.findById(anyLong()))
+        when(mockItemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item1));
         ItemBookingHistoryDto returnItem = itemService.getItem(itemDto1.getId(), itemDto1.getId());
         assertEquals(returnItem.getId(), itemDto1.getId());
@@ -153,7 +152,7 @@ class ItemServiceImplTest {
 
     @Test
     void getItemNotFound() {
-        when(itemRepository.findById(1L))
+        when(mockItemRepository.findById(1L))
                 .thenThrow(new NoSuchObjectException(String.format("Item with ID=%s not found", itemDto1.getId())));
         final NoSuchObjectException exception = assertThrows(
                 NoSuchObjectException.class,
@@ -163,9 +162,9 @@ class ItemServiceImplTest {
 
     @Test
     void getItemWithNextBookings() {
-        when(itemRepository.findById(anyLong()))
+        when(mockItemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item1));
-        when(bookingRepository.findByItem_IdOrderByStartDesc(anyLong()))
+        when(mockBookingRepository.findByItem_IdOrderByStartDesc(anyLong()))
                 .thenReturn(List.of(bookingItem1));
         ItemBookingHistoryDto returnItem = itemService.getItem(itemDto1.getId(), itemDto1.getId());
         assertNotNull(returnItem.getNextBooking());
@@ -173,9 +172,9 @@ class ItemServiceImplTest {
 
     @Test
     void getUsersOwnItems() {
-        when(itemRepository.findItemsByOwner(owner.getId()))
+        when(mockItemRepository.findItemsByOwner(owner.getId()))
                 .thenReturn(List.of(item1));
-        when(itemRepository.findById(anyLong()))
+        when(mockItemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item1));
         ArrayList<ItemBookingHistoryDto> items = new ArrayList<>(itemService.getUsersOwnItems(owner.getId()));
         assertEquals(items.size(), 1);
@@ -188,7 +187,7 @@ class ItemServiceImplTest {
 
     @Test
     void getUsersOwnItemsNotFound() {
-        when(itemRepository.findItemsByOwner(owner.getId()))
+        when(mockItemRepository.findItemsByOwner(owner.getId()))
                 .thenThrow(new NoSuchObjectException(String.format("Item with ID=%s not found", itemDto1.getId())));
         final NoSuchObjectException exception = assertThrows(
                 NoSuchObjectException.class,
@@ -198,7 +197,7 @@ class ItemServiceImplTest {
 
     @Test
     void searchItemByDescription() {
-        when(itemRepository.findItemByNameAndDescription(anyString()))
+        when(mockItemRepository.findItemByNameAndDescription(anyString()))
                 .thenReturn(List.of(item1, item2));
         ArrayList<ItemDto> itemDtos = new ArrayList<>(itemService.searchItemByDescription("item"));
         assertEquals(itemDtos.size(), 2);
@@ -208,16 +207,16 @@ class ItemServiceImplTest {
     void addComment() {
         CommentDTO commentDto = CommentDTO.create(1L, "booking 1", booker.getName(), LocalDateTime.now().minusHours(1));
         bookingItem1.setStart(LocalDateTime.now().minusHours(1));
-        when(itemRepository.findById(anyLong()))
+        when(mockItemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item1));
 
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(booker));
 
-        when(bookingRepository.findByBookerAndItem(booker.getId(), item1.getId(), BookingStatus.APPROVED))
+        when(mockBookingRepository.findByBookerAndItem(booker.getId(), item1.getId(), BookingStatus.APPROVED))
                 .thenReturn(List.of(bookingItem1));
 
-        when(commentRepository.save(any(Comment.class)))
+        when(mockCommentRepository.save(any(Comment.class)))
                 .thenReturn(CommentMapper.dtoToComment(commentDto, item1, booker));
 
         CommentDTO returnDto = itemService.addComment(item1.getId(), booker.getId(), commentDto);
@@ -232,13 +231,13 @@ class ItemServiceImplTest {
         CommentDTO commentDto = CommentDTO.create(1L, "booking 1", booker.getName(), LocalDateTime.now().minusHours(1));
         bookingItem1 = Booking.create(1L, item1, booker, LocalDateTime.now().plusHours(1), LocalDateTime.now(),
                 BookingStatus.APPROVED);
-        when(itemRepository.findById(anyLong()))
+        when(mockItemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item1));
 
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(booker));
 
-        when(bookingRepository.findByBookerAndItem(booker.getId(), item1.getId(), BookingStatus.APPROVED))
+        when(mockBookingRepository.findByBookerAndItem(booker.getId(), item1.getId(), BookingStatus.APPROVED))
                 .thenReturn(List.of(bookingItem1));
 
         final CommentException exception = assertThrows(
@@ -252,13 +251,13 @@ class ItemServiceImplTest {
         CommentDTO commentDto = CommentDTO.create(1L, "booking 1", booker.getName(), LocalDateTime.now().minusHours(1));
         bookingItem1 = Booking.create(1L, item1, booker, LocalDateTime.now().minusHours(1), LocalDateTime.now(),
                 BookingStatus.WAITING);
-        when(itemRepository.findById(anyLong()))
+        when(mockItemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item1));
 
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(booker));
 
-        when(bookingRepository.findByBookerAndItem(booker.getId(), item1.getId(), BookingStatus.APPROVED))
+        when(mockBookingRepository.findByBookerAndItem(booker.getId(), item1.getId(), BookingStatus.APPROVED))
                 .thenReturn(new ArrayList<>());
 
         final CommentException exception = assertThrows(

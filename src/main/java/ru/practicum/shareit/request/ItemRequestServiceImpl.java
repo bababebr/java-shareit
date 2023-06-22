@@ -27,7 +27,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public ItemRequestDto addItem(ItemRequestDto itemRequestDto, Long userId) {
         userRepository.findById(userId).orElseThrow(() -> new NoSuchObjectException("User has not found."));
         itemRequestDto.setCreated(LocalDateTime.now());
-        itemRequestDto.setUserId(userId);
+        itemRequestDto.setRequesterId(userId);
         ItemRequest itemRequest = requestRepository.save(ItemRequestMapper.dtoToRequest(itemRequestDto, userId));
         return ItemRequestMapper.requestToDto(itemRequest);
     }
@@ -81,7 +81,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         if ((from < 0 || size < 0) || (from == 0 && size == 0)) {
             throw new ItemsAvailabilityException("Invalid paging size");
         }
-        List<ItemRequest> itemRequests = requestRepository.findAllForOtherUsers(userId);
+        List<ItemRequest> itemRequests = requestRepository.findAllByUserIdIsNot(userId);
         List<ItemRequestDto> requestDtos = new ArrayList<>();
         int maxSize = itemRequests.size();
         maxSize = maxSize > size ? size : maxSize;

@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @Transactional
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
 
     @Autowired
@@ -35,8 +34,6 @@ class UserServiceImplTest {
 
     private Item item1;
     private Item item2;
-    private ItemDto itemDto1;
-    private ItemDto itemDto2;
     private User owner;
     private User booker;
 

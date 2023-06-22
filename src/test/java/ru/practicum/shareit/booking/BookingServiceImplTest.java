@@ -34,19 +34,18 @@ import static org.mockito.Mockito.when;
 @Transactional
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@ExtendWith(MockitoExtension.class)
 public class BookingServiceImplTest {
 
     @InjectMocks
     BookingServiceImpl bookingService;
     @Mock
-    BookingRepository bookingRepository;
+    BookingRepository mockBookingRepository;
     @Mock
-    ItemRepository itemRepository;
+    ItemRepository mockItemRepository;
     @Mock
-    UserRepository userRepository;
+    UserRepository mockUserRepository;
     private Booking booking;
-    private Booking bookingCangelled;
+    private Booking bookingCancelled;
     private Booking bookingApproved;
     private Booking bookingRejected;
     private BookingDto bookingDto;
@@ -59,7 +58,7 @@ public class BookingServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        bookingService = new BookingServiceImpl(itemRepository, userRepository, bookingRepository);
+        bookingService = new BookingServiceImpl(mockItemRepository, mockUserRepository, mockBookingRepository);
         user = User.create(1L, "user", "user@mail.ru");
         owner = User.create(2L, "owner", "owner@mail.ru");
         item = Item.create(1L, owner, true, "Item 1", "Item", null);
@@ -68,18 +67,18 @@ public class BookingServiceImplTest {
         end = LocalDateTime.now().plusHours(2);
         booking = Booking.create(1L, item, user, startFuture, end, BookingStatus.WAITING);
         bookingApproved = Booking.create(2L, item, user, startPast, end, BookingStatus.APPROVED);
-        bookingCangelled = Booking.create(3L, item, user, startPast, end, BookingStatus.CANCELLED);
+        bookingCancelled = Booking.create(3L, item, user, startPast, end, BookingStatus.CANCELLED);
         bookingRejected = Booking.create(4L, item, user, startPast, startPast.plusMinutes(3), BookingStatus.REJECTED);
         bookingDto = BookingDto.create(1L, item.getId(), item, user, startFuture, end, BookingStatus.WAITING);
     }
 
     @Test
     void addBooking() {
-        when(itemRepository.findById(anyLong()))
+        when(mockItemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(bookingRepository.save(Mockito.any(Booking.class)))
+        when(mockBookingRepository.save(Mockito.any(Booking.class)))
                 .thenReturn(booking);
 
         BookingDto returnBooking = bookingService.add(user.getId(), bookingDto);
@@ -92,7 +91,7 @@ public class BookingServiceImplTest {
 
     @Test
     void addBookingItemNotFound() {
-        when(itemRepository.findById(item.getId()))
+        when(mockItemRepository.findById(item.getId()))
                 .thenThrow(new NoSuchObjectException("Item with ID=1 not found"));
         final NoSuchObjectException e = assertThrows(NoSuchObjectException.class,
                 () -> bookingService.add(user.getId(), bookingDto));
@@ -101,9 +100,9 @@ public class BookingServiceImplTest {
 
     @Test
     void addBookingUserNotFound() {
-        when(itemRepository.findById(anyLong()))
+        when(mockItemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
-        when(userRepository.findById(user.getId()))
+        when(mockUserRepository.findById(user.getId()))
                 .thenThrow(new NoSuchObjectException("User with ID=1 not found"));
         final NoSuchObjectException e = assertThrows(NoSuchObjectException.class,
                 () -> bookingService.add(user.getId(), bookingDto));
@@ -113,9 +112,9 @@ public class BookingServiceImplTest {
     @Test
     void addBookingByOwner() {
         item.setOwner(user);
-        when(itemRepository.findById(anyLong()))
+        when(mockItemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
         final NoSuchObjectException e = assertThrows(NoSuchObjectException.class,
                 () -> bookingService.add(user.getId(), bookingDto));
@@ -125,9 +124,9 @@ public class BookingServiceImplTest {
     @Test
     void addBookingNotAvailable() {
         item.setAvailable(false);
-        when(itemRepository.findById(anyLong()))
+        when(mockItemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
         final ItemsAvailabilityException e = assertThrows(ItemsAvailabilityException.class,
                 () -> bookingService.add(user.getId(), bookingDto));
@@ -140,11 +139,11 @@ public class BookingServiceImplTest {
         LocalDateTime existEnd = startPast.minusMinutes(5);
         Booking existBooking = Booking.create(2L, item, user, existStart, existEnd, BookingStatus.APPROVED);
 
-        when(itemRepository.findById(anyLong()))
+        when(mockItemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(bookingRepository.findByItem_IdOrderByStartDesc(anyLong()))
+        when(mockBookingRepository.findByItem_IdOrderByStartDesc(anyLong()))
                 .thenReturn(List.of(existBooking));
         BookingDto returnBooking = bookingService.add(user.getId(), bookingDto);
         Assertions.assertEquals(booking.getItem(), returnBooking.getItem());
@@ -160,11 +159,11 @@ public class BookingServiceImplTest {
         LocalDateTime existEnd = end.minusMinutes(5);
         Booking existBooking = Booking.create(2L, item, user, existStart, existEnd, BookingStatus.APPROVED);
 
-        when(itemRepository.findById(anyLong()))
+        when(mockItemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(bookingRepository.findByItem_IdOrderByStartDesc(anyLong()))
+        when(mockBookingRepository.findByItem_IdOrderByStartDesc(anyLong()))
                 .thenReturn(List.of(existBooking));
 
         final ItemsAvailabilityException e = assertThrows(ItemsAvailabilityException.class,
@@ -178,11 +177,11 @@ public class BookingServiceImplTest {
         LocalDateTime existEnd = end.plusHours(2);
         Booking existBooking = Booking.create(2L, item, user, existStart, existEnd, BookingStatus.APPROVED);
 
-        when(itemRepository.findById(anyLong()))
+        when(mockItemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(bookingRepository.findByItem_IdOrderByStartDesc(anyLong()))
+        when(mockBookingRepository.findByItem_IdOrderByStartDesc(anyLong()))
                 .thenReturn(List.of(existBooking));
 
         final ItemsAvailabilityException e = assertThrows(ItemsAvailabilityException.class,
@@ -196,11 +195,11 @@ public class BookingServiceImplTest {
         LocalDateTime existEnd = end.plusHours(2);
         Booking existBooking = Booking.create(2L, item, user, existStart, existEnd, BookingStatus.APPROVED);
 
-        when(itemRepository.findById(anyLong()))
+        when(mockItemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(bookingRepository.findByItem_IdOrderByStartDesc(anyLong()))
+        when(mockBookingRepository.findByItem_IdOrderByStartDesc(anyLong()))
                 .thenReturn(List.of(existBooking));
         BookingDto returnBooking = bookingService.add(user.getId(), bookingDto);
         Assertions.assertEquals(booking.getItem(), returnBooking.getItem());
@@ -212,7 +211,7 @@ public class BookingServiceImplTest {
 
     @Test
     void getBookingNotFound() {
-        when(bookingRepository.findById(anyLong()))
+        when(mockBookingRepository.findById(anyLong()))
                 .thenThrow(new NoSuchObjectException("Booking not found"));
         final NoSuchObjectException e = assertThrows(NoSuchObjectException.class,
                 () -> bookingService.get(booking.getId(), user.getId()));
@@ -221,7 +220,7 @@ public class BookingServiceImplTest {
 
     @Test
     void getBookingNotBookerOrOwner() {
-        when(bookingRepository.findById(anyLong()))
+        when(mockBookingRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(booking));
         final NoSuchObjectException e = assertThrows(NoSuchObjectException.class,
                 () -> bookingService.get(booking.getId(), 3L));
@@ -230,7 +229,7 @@ public class BookingServiceImplTest {
 
     @Test
     void getBookingByBooker() {
-        when(bookingRepository.findById(anyLong()))
+        when(mockBookingRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(booking));
         BookingDto dto = bookingService.get(booking.getId(), user.getId());
         Assertions.assertEquals(booking.getItem(), dto.getItem());
@@ -242,7 +241,7 @@ public class BookingServiceImplTest {
 
     @Test
     void getBookingByOwner() {
-        when(bookingRepository.findById(anyLong()))
+        when(mockBookingRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(booking));
         BookingDto dto = bookingService.get(booking.getId(), owner.getId());
         Assertions.assertEquals(booking.getItem(), dto.getItem());
@@ -254,7 +253,7 @@ public class BookingServiceImplTest {
 
     @Test
     void getBookingsUserNotFound() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenThrow(new NoSuchObjectException("User with ID=2 not found"));
         final NoSuchObjectException e = assertThrows(NoSuchObjectException.class,
                 () -> bookingService.get(user.getId()));
@@ -263,9 +262,9 @@ public class BookingServiceImplTest {
 
     @Test
     void getBookingsUserBookingNotFound() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(bookingRepository.findByBooker_IdOrderByStartDesc(anyLong()))
+        when(mockBookingRepository.findByBooker_IdOrderByStartDesc(anyLong()))
                 .thenThrow(new NoSuchElementException("Booking not found"));
         final NoSuchElementException e = assertThrows(NoSuchElementException.class,
                 () -> bookingService.get(user.getId()));
@@ -274,9 +273,9 @@ public class BookingServiceImplTest {
 
     @Test
     void getBookings() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(bookingRepository.findByBooker_IdOrderByStartDesc(anyLong()))
+        when(mockBookingRepository.findByBooker_IdOrderByStartDesc(anyLong()))
                 .thenReturn(List.of(booking));
         List<BookingDto> bookings = bookingService.get(user.getId());
         assertEquals(1, bookings.size());
@@ -289,7 +288,7 @@ public class BookingServiceImplTest {
 
     @Test
     void getAllUserBookingsUserNotFound() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenThrow(new NoSuchObjectException("User with ID=2 not found"));
         final NoSuchObjectException e = assertThrows(NoSuchObjectException.class,
                 () -> bookingService.getAllUserBookings(user.getId(), booking.getState().toString(),
@@ -299,7 +298,7 @@ public class BookingServiceImplTest {
 
     @Test
     void getAllUserBookingsFromMinus2() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
         List<BookingDto> dtos = bookingService.getAllUserBookings(user.getId(), booking.getState().toString(), -2, 10);
         assertEquals(0, dtos.size());
@@ -307,7 +306,7 @@ public class BookingServiceImplTest {
 
     @Test
     void getAllUserBookingsFromNegative() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
         final ItemsAvailabilityException e = assertThrows(ItemsAvailabilityException.class,
                 () -> bookingService.getAllUserBookings(user.getId(), booking.getState().toString(), -1, 10));
@@ -316,7 +315,7 @@ public class BookingServiceImplTest {
 
     @Test
     void getAllUserBookingsSizeNegative() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
         final ItemsAvailabilityException e = assertThrows(ItemsAvailabilityException.class,
                 () -> bookingService.getAllUserBookings(user.getId(), booking.getState().toString(), 1, -3));
@@ -325,7 +324,7 @@ public class BookingServiceImplTest {
 
     @Test
     void getAllUserBookingsSizeAndFromZeros() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
         final ItemsAvailabilityException e = assertThrows(ItemsAvailabilityException.class,
                 () -> bookingService.getAllUserBookings(user.getId(), booking.getState().toString(), 0, 0));
@@ -334,10 +333,10 @@ public class BookingServiceImplTest {
 
     @Test
     void getAllUserBookingsAll() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(bookingRepository.findByBooker_IdOrderByStartDesc(anyLong()))
-                .thenReturn(List.of(booking, bookingApproved, bookingCangelled, bookingRejected));
+        when(mockBookingRepository.findByBooker_IdOrderByStartDesc(anyLong()))
+                .thenReturn(List.of(booking, bookingApproved, bookingCancelled, bookingRejected));
         List<BookingDto> bookings = bookingService.getAllUserBookings(user.getId(),
                 "ALL", 0, 10);
         assertEquals(4, bookings.size());
@@ -347,15 +346,15 @@ public class BookingServiceImplTest {
         Assertions.assertEquals(booking.getState(), bookings.get(0).getStatus());
         Assertions.assertEquals(booking.getEnd(), bookings.get(0).getEnd());
         Assertions.assertEquals(bookingApproved.getItem(), bookings.get(1).getItem());
-        Assertions.assertEquals(bookingCangelled.getItem(), bookings.get(2).getItem());
+        Assertions.assertEquals(bookingCancelled.getItem(), bookings.get(2).getItem());
         Assertions.assertEquals(bookingRejected.getItem(), bookings.get(3).getItem());
     }
 
     @Test
     void getAllUserBookingsApproved() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(bookingRepository.findByBooker_IdAndState(anyLong(), any(BookingStatus.class)))
+        when(mockBookingRepository.findByBooker_IdAndState(anyLong(), any(BookingStatus.class)))
                 .thenReturn(List.of(bookingApproved));
         List<BookingDto> bookings = bookingService.getAllUserBookings(user.getId(),
                 "APPROVED", 0, 10);
@@ -369,9 +368,9 @@ public class BookingServiceImplTest {
 
     @Test
     void getAllUserBookingsRejected() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(bookingRepository.findByBooker_IdAndState(anyLong(), any(BookingStatus.class)))
+        when(mockBookingRepository.findByBooker_IdAndState(anyLong(), any(BookingStatus.class)))
                 .thenReturn(List.of(bookingRejected));
         List<BookingDto> bookings = bookingService.getAllUserBookings(user.getId(),
                 "REJECTED", 0, 10);
@@ -385,9 +384,9 @@ public class BookingServiceImplTest {
 
     @Test
     void getAllUserBookingsWaiting() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(bookingRepository.findByBooker_IdAndState(anyLong(), any(BookingStatus.class)))
+        when(mockBookingRepository.findByBooker_IdAndState(anyLong(), any(BookingStatus.class)))
                 .thenReturn(List.of(booking));
         List<BookingDto> bookings = bookingService.getAllUserBookings(user.getId(),
                 "WAITING", 0, 10);
@@ -401,11 +400,11 @@ public class BookingServiceImplTest {
 
     @Test
     void getAllUserBookingsCurrent() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(bookingRepository.findByBooker_IdAndEndIsAfterAndStartIsBefore(anyLong(),
+        when(mockBookingRepository.findByBooker_IdAndEndIsAfterAndStartIsBefore(anyLong(),
                 any(LocalDateTime.class), any(LocalDateTime.class)))
-                .thenReturn(List.of(bookingApproved, bookingCangelled));
+                .thenReturn(List.of(bookingApproved, bookingCancelled));
         List<BookingDto> bookings = bookingService.getAllUserBookings(user.getId(),
                 "CURRENT", 0, 10);
         assertEquals(2, bookings.size());
@@ -414,18 +413,18 @@ public class BookingServiceImplTest {
         Assertions.assertEquals(bookingApproved.getStart(), bookings.get(0).getStart());
         Assertions.assertEquals(bookingApproved.getState(), bookings.get(0).getStatus());
         Assertions.assertEquals(bookingApproved.getEnd(), bookings.get(0).getEnd());
-        Assertions.assertEquals(bookingCangelled.getItem(), bookings.get(1).getItem());
-        Assertions.assertEquals(bookingCangelled.getId(), bookings.get(1).getId());
-        Assertions.assertEquals(bookingCangelled.getStart(), bookings.get(1).getStart());
-        Assertions.assertEquals(bookingCangelled.getState(), bookings.get(1).getStatus());
-        Assertions.assertEquals(bookingCangelled.getEnd(), bookings.get(1).getEnd());
+        Assertions.assertEquals(bookingCancelled.getItem(), bookings.get(1).getItem());
+        Assertions.assertEquals(bookingCancelled.getId(), bookings.get(1).getId());
+        Assertions.assertEquals(bookingCancelled.getStart(), bookings.get(1).getStart());
+        Assertions.assertEquals(bookingCancelled.getState(), bookings.get(1).getStatus());
+        Assertions.assertEquals(bookingCancelled.getEnd(), bookings.get(1).getEnd());
     }
 
     @Test
     void getAllUserBookingPast() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(bookingRepository.findByBooker_IdAndEndIsBeforeOrderByStartDesc(anyLong(),
+        when(mockBookingRepository.findByBooker_IdAndEndIsBeforeOrderByStartDesc(anyLong(),
                 any(LocalDateTime.class)))
                 .thenReturn(List.of(bookingRejected));
         List<BookingDto> bookings = bookingService.getAllUserBookings(user.getId(),
@@ -440,9 +439,9 @@ public class BookingServiceImplTest {
 
     @Test
     void getAllUserBookingFuture() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(bookingRepository.findByBooker_IdAndStartIsAfterOrderByStartDesc(anyLong(),
+        when(mockBookingRepository.findByBooker_IdAndStartIsAfterOrderByStartDesc(anyLong(),
                 any(LocalDateTime.class)))
                 .thenReturn(List.of(booking));
         List<BookingDto> bookings = bookingService.getAllUserBookings(user.getId(),
@@ -457,7 +456,7 @@ public class BookingServiceImplTest {
 
     @Test
     void getAllUserBookingUnknown() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
         final StateException e = assertThrows(StateException.class, () -> bookingService.getAllUserBookings(user.getId(),
                 "ANY", 0, 10));
@@ -466,7 +465,7 @@ public class BookingServiceImplTest {
 
     @Test
     void getAllOwnerBookingsUserNotFound() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenThrow(new NoSuchObjectException("User with ID=2 not found"));
         final NoSuchObjectException e = assertThrows(NoSuchObjectException.class,
                 () -> bookingService.getAllOwnersBooking(user.getId(), booking.getState().toString(),
@@ -476,7 +475,7 @@ public class BookingServiceImplTest {
 
     @Test
     void getAllOwnerBookingsFromMinus2() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
         List<BookingDto> dtos = bookingService.getAllOwnersBooking(user.getId(), booking.getState().toString(), -2, 10);
         assertEquals(0, dtos.size());
@@ -484,7 +483,7 @@ public class BookingServiceImplTest {
 
     @Test
     void getAlOwnerBookingsFromNegative() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
         final ItemsAvailabilityException e = assertThrows(ItemsAvailabilityException.class,
                 () -> bookingService.getAllOwnersBooking(user.getId(), booking.getState().toString(), -1, 10));
@@ -493,7 +492,7 @@ public class BookingServiceImplTest {
 
     @Test
     void getAlOwnerBookingsSizeNegative() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
         final ItemsAvailabilityException e = assertThrows(ItemsAvailabilityException.class,
                 () -> bookingService.getAllOwnersBooking(user.getId(), booking.getState().toString(), 1, -3));
@@ -502,7 +501,7 @@ public class BookingServiceImplTest {
 
     @Test
     void getAllOwnerBookingsSizeAndFromZeros() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
         final ItemsAvailabilityException e = assertThrows(ItemsAvailabilityException.class,
                 () -> bookingService.getAllOwnersBooking(user.getId(), booking.getState().toString(), 0, 0));
@@ -511,10 +510,10 @@ public class BookingServiceImplTest {
 
     @Test
     void getAllOwnerBookingsAll() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(bookingRepository.findByItem_OwnerIdOrderByStartDesc(anyLong()))
-                .thenReturn(List.of(booking, bookingApproved, bookingCangelled, bookingRejected));
+        when(mockBookingRepository.findByItem_OwnerIdOrderByStartDesc(anyLong()))
+                .thenReturn(List.of(booking, bookingApproved, bookingCancelled, bookingRejected));
         List<BookingDto> bookings = bookingService.getAllOwnersBooking(user.getId(),
                 "ALL", 0, 10);
         assertEquals(4, bookings.size());
@@ -524,15 +523,15 @@ public class BookingServiceImplTest {
         Assertions.assertEquals(booking.getState(), bookings.get(0).getStatus());
         Assertions.assertEquals(booking.getEnd(), bookings.get(0).getEnd());
         Assertions.assertEquals(bookingApproved.getItem(), bookings.get(1).getItem());
-        Assertions.assertEquals(bookingCangelled.getItem(), bookings.get(2).getItem());
+        Assertions.assertEquals(bookingCancelled.getItem(), bookings.get(2).getItem());
         Assertions.assertEquals(bookingRejected.getItem(), bookings.get(3).getItem());
     }
 
     @Test
     void getAllOwnerBookingsApproved() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(bookingRepository.findByItem_OwnerIdAndState(anyLong(), any(BookingStatus.class)))
+        when(mockBookingRepository.findByItem_OwnerIdAndState(anyLong(), any(BookingStatus.class)))
                 .thenReturn(List.of(bookingApproved));
         List<BookingDto> bookings = bookingService.getAllOwnersBooking(user.getId(),
                 "APPROVED", 0, 10);
@@ -546,9 +545,9 @@ public class BookingServiceImplTest {
 
     @Test
     void getAllOwnerBookingsRejected() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(bookingRepository.findByItem_OwnerIdAndState(anyLong(), any(BookingStatus.class)))
+        when(mockBookingRepository.findByItem_OwnerIdAndState(anyLong(), any(BookingStatus.class)))
                 .thenReturn(List.of(bookingRejected));
         List<BookingDto> bookings = bookingService.getAllOwnersBooking(user.getId(),
                 "REJECTED", 0, 10);
@@ -562,9 +561,9 @@ public class BookingServiceImplTest {
 
     @Test
     void getAllOwnerBookingsWaiting() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(bookingRepository.findByItem_OwnerIdAndState(anyLong(), any(BookingStatus.class)))
+        when(mockBookingRepository.findByItem_OwnerIdAndState(anyLong(), any(BookingStatus.class)))
                 .thenReturn(List.of(booking));
         List<BookingDto> bookings = bookingService.getAllOwnersBooking(user.getId(),
                 "WAITING", 0, 10);
@@ -578,11 +577,11 @@ public class BookingServiceImplTest {
 
     @Test
     void getAllOwnerBookingsCurrent() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(bookingRepository.findByItem_OwnerIdAndEndIsAfterAndStartIsBefore(anyLong(),
+        when(mockBookingRepository.findByItem_OwnerIdAndEndIsAfterAndStartIsBefore(anyLong(),
                 any(LocalDateTime.class), any(LocalDateTime.class)))
-                .thenReturn(List.of(bookingApproved, bookingCangelled));
+                .thenReturn(List.of(bookingApproved, bookingCancelled));
         List<BookingDto> bookings = bookingService.getAllOwnersBooking(user.getId(),
                 "CURRENT", 0, 10);
         assertEquals(2, bookings.size());
@@ -591,18 +590,18 @@ public class BookingServiceImplTest {
         Assertions.assertEquals(bookingApproved.getStart(), bookings.get(0).getStart());
         Assertions.assertEquals(bookingApproved.getState(), bookings.get(0).getStatus());
         Assertions.assertEquals(bookingApproved.getEnd(), bookings.get(0).getEnd());
-        Assertions.assertEquals(bookingCangelled.getItem(), bookings.get(1).getItem());
-        Assertions.assertEquals(bookingCangelled.getId(), bookings.get(1).getId());
-        Assertions.assertEquals(bookingCangelled.getStart(), bookings.get(1).getStart());
-        Assertions.assertEquals(bookingCangelled.getState(), bookings.get(1).getStatus());
-        Assertions.assertEquals(bookingCangelled.getEnd(), bookings.get(1).getEnd());
+        Assertions.assertEquals(bookingCancelled.getItem(), bookings.get(1).getItem());
+        Assertions.assertEquals(bookingCancelled.getId(), bookings.get(1).getId());
+        Assertions.assertEquals(bookingCancelled.getStart(), bookings.get(1).getStart());
+        Assertions.assertEquals(bookingCancelled.getState(), bookings.get(1).getStatus());
+        Assertions.assertEquals(bookingCancelled.getEnd(), bookings.get(1).getEnd());
     }
 
     @Test
     void getAllOwnerBookingPast() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(bookingRepository.findByItem_OwnerIdAndEndIsBeforeOrderByStartDesc(anyLong(),
+        when(mockBookingRepository.findByItem_OwnerIdAndEndIsBeforeOrderByStartDesc(anyLong(),
                 any(LocalDateTime.class)))
                 .thenReturn(List.of(bookingRejected));
         List<BookingDto> bookings = bookingService.getAllOwnersBooking(user.getId(),
@@ -617,9 +616,9 @@ public class BookingServiceImplTest {
 
     @Test
     void getAllOwnerBookingFuture() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(bookingRepository.findByItem_OwnerIdAndStartIsAfterOrderByStartDesc(anyLong(),
+        when(mockBookingRepository.findByItem_OwnerIdAndStartIsAfterOrderByStartDesc(anyLong(),
                 any(LocalDateTime.class)))
                 .thenReturn(List.of(booking));
         List<BookingDto> bookings = bookingService.getAllOwnersBooking(user.getId(),
@@ -634,7 +633,7 @@ public class BookingServiceImplTest {
 
     @Test
     void getAllOwnerBookingUnknown() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
         final StateException e = assertThrows(StateException.class, () -> bookingService.getAllOwnersBooking(user.getId(),
                 "ANY", 0, 10));
@@ -643,7 +642,7 @@ public class BookingServiceImplTest {
 
     @Test
     void approveUserNotFound() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenThrow(new NoSuchObjectException("User not found"));
         final NoSuchObjectException e = assertThrows(NoSuchObjectException.class, () ->
                 bookingService.approve(owner.getId(), booking.getId(), true));
@@ -652,9 +651,9 @@ public class BookingServiceImplTest {
 
     @Test
     void approveBookingNotFound() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(bookingRepository.findByItem_OwnerIdAndId(anyLong(), anyLong()))
+        when(mockBookingRepository.findByItem_OwnerIdAndId(anyLong(), anyLong()))
                 .thenThrow(new NoSuchObjectException("Booking not found"));
         final NoSuchObjectException e = assertThrows(NoSuchObjectException.class, () ->
                 bookingService.approve(owner.getId(), booking.getId(), true));
@@ -663,9 +662,9 @@ public class BookingServiceImplTest {
 
     @Test
     void approveBookingChangeStatus() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(bookingRepository.findByItem_OwnerIdAndId(anyLong(), anyLong()))
+        when(mockBookingRepository.findByItem_OwnerIdAndId(anyLong(), anyLong()))
                 .thenReturn(bookingApproved);
         final ItemsAvailabilityException e = assertThrows(ItemsAvailabilityException.class, () ->
                 bookingService.approve(owner.getId(), booking.getId(), true));
@@ -674,9 +673,9 @@ public class BookingServiceImplTest {
 
     @Test
     void approveBooking() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(bookingRepository.findByItem_OwnerIdAndId(anyLong(), anyLong()))
+        when(mockBookingRepository.findByItem_OwnerIdAndId(anyLong(), anyLong()))
                 .thenReturn(booking);
         BookingDto dto = bookingService.approve(owner.getId(), booking.getId(), true);
         assertEquals("APPROVED", booking.getState().toString());
@@ -684,9 +683,9 @@ public class BookingServiceImplTest {
 
     @Test
     void rejectBooking() {
-        when(userRepository.findById(anyLong()))
+        when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(bookingRepository.findByItem_OwnerIdAndId(anyLong(), anyLong()))
+        when(mockBookingRepository.findByItem_OwnerIdAndId(anyLong(), anyLong()))
                 .thenReturn(booking);
         BookingDto dto = bookingService.approve(owner.getId(), booking.getId(), false);
         assertEquals("REJECTED", booking.getState().toString());

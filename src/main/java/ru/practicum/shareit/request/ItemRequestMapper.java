@@ -12,7 +12,7 @@ public class ItemRequestMapper {
                 itemRequest.getDescription(),
                 itemRequest.getCreated(),
                 itemsList,
-                itemRequest.getUserId());
+                itemRequest.getRequesterID());
         return itemRequestDto;
     }
 
@@ -21,7 +21,7 @@ public class ItemRequestMapper {
                 itemRequest.getDescription(),
                 itemRequest.getCreated(),
                 new ArrayList<>(),
-                itemRequest.getUserId());
+                itemRequest.getRequesterID());
         return itemRequestDto;
     }
 
