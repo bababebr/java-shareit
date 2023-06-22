@@ -80,38 +80,44 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> getAllUserBookings(Long userId, String status, int from, int size) {
+        PageRequest pageRequest = PageRequest.of(from, size);
         userRepository.findById(userId).orElseThrow(()
                 -> new NoSuchObjectException(String.format("User with ID=%s not found", userId)));
         List<BookingDto> bookingDtos;
         switch (status) {
             case "ALL":
-                PageRequest pageRequest = PageRequest.of(from, size);
+                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdOrderByStartDesc(userId,
+                        Pageable.unpaged()));
+                if((bookingDtos.size() - from) < size) {
+                    size = bookingDtos.size() - from;
+                }
+                pageRequest = PageRequest.of(from, size);
                 bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdOrderByStartDesc(userId,
                         pageRequest));
                 return bookingDtos;
             case "APPROVED":
                 bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdAndState(userId,
-                        BookingStatus.APPROVED, PageRequest.of(from, size)));
+                        BookingStatus.APPROVED, pageRequest));
                 return bookingDtos;
             case "REJECTED":
                 bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdAndState(userId
-                        , BookingStatus.REJECTED, PageRequest.of(from, size)));
+                        , BookingStatus.REJECTED, pageRequest));
                 return bookingDtos;
             case "WAITING":
                 bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdAndState(userId,
-                        BookingStatus.WAITING, PageRequest.of(from, size)));
+                        BookingStatus.WAITING, pageRequest));
                 return bookingDtos;
             case "CURRENT":
                 bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdAndEndIsAfterAndStartIsBefore(
-                        userId, LocalDateTime.now(), LocalDateTime.now(), PageRequest.of(from, size)));
+                        userId, LocalDateTime.now(), LocalDateTime.now(), pageRequest));
                 return bookingDtos;
             case "PAST":
                 bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdAndEndIsBeforeOrderByStartDesc(
-                        userId, LocalDateTime.now(), PageRequest.of(from, size)));
+                        userId, LocalDateTime.now(), pageRequest));
                 return bookingDtos;
             case "FUTURE":
                 bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdAndStartIsAfterOrderByStartDesc(
-                        userId, LocalDateTime.now(), PageRequest.of(from, size)));
+                        userId, LocalDateTime.now(), pageRequest));
                 return bookingDtos;
             default:
                 throw new StateException("UNKNOWN_STATE");
@@ -123,36 +129,37 @@ public class BookingServiceImpl implements BookingService {
         userRepository.findById(userId).orElseThrow(()
                 -> new NoSuchObjectException(String.format("User with ID=%s not found", userId)));
         List<BookingDto> bookingDtos;
+        PageRequest pageRequest = PageRequest.of(from, size);
         switch (state) {
             case "ALL":
                 bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByItem_OwnerIdOrderByStartDesc(userId,
-                        PageRequest.of(from, size)));
+                        pageRequest));
                 return bookingDtos;
             case "APPROVED":
                 bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByItem_OwnerIdAndState(userId,
-                        BookingStatus.APPROVED, PageRequest.of(from, size)));
+                        BookingStatus.APPROVED, pageRequest));
                 return bookingDtos;
             case "REJECTED":
                 bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByItem_OwnerIdAndState(userId,
-                        BookingStatus.REJECTED, PageRequest.of(from, size)));
+                        BookingStatus.REJECTED, pageRequest));
                 return bookingDtos;
             case "WAITING":
                 bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByItem_OwnerIdAndState(userId,
-                        BookingStatus.WAITING, PageRequest.of(from, size)));
+                        BookingStatus.WAITING, pageRequest));
                 return bookingDtos;
             case "CURRENT":
                 bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByItem_OwnerIdAndEndIsAfterAndStartIsBefore(
-                        userId, LocalDateTime.now(), LocalDateTime.now(), PageRequest.of(from, size)));
+                        userId, LocalDateTime.now(), LocalDateTime.now(), pageRequest));
                 return bookingDtos;
             case "PAST":
                 bookingDtos = BookingMapper.bookingDtos(bookingRepository.
                         findByItem_OwnerIdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now(),
-                                PageRequest.of(from, size)));
+                                pageRequest));
                 return bookingDtos;
             case "FUTURE":
                 bookingDtos = BookingMapper.bookingDtos(bookingRepository.
                         findByItem_OwnerIdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now(),
-                                PageRequest.of(from, size)));
+                                pageRequest));
                 return bookingDtos;
             default:
                 throw new StateException("UNKNOWN_STATE");
