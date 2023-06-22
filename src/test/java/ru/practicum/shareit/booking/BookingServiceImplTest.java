@@ -11,6 +11,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.exception.ItemsAvailabilityException;
 import ru.practicum.shareit.exception.NoSuchObjectException;
@@ -264,7 +265,7 @@ public class BookingServiceImplTest {
     void getBookingsUserBookingNotFound() {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(mockBookingRepository.findByBooker_IdOrderByStartDesc(anyLong()))
+        when(mockBookingRepository.findByBooker_IdOrderByStartDesc(anyLong(), any(Pageable.class)))
                 .thenThrow(new NoSuchElementException("Booking not found"));
         final NoSuchElementException e = assertThrows(NoSuchElementException.class,
                 () -> bookingService.get(user.getId()));
@@ -275,7 +276,7 @@ public class BookingServiceImplTest {
     void getBookings() {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(mockBookingRepository.findByBooker_IdOrderByStartDesc(anyLong()))
+        when(mockBookingRepository.findByBooker_IdOrderByStartDesc(anyLong(), any(Pageable.class)))
                 .thenReturn(List.of(booking));
         List<BookingDto> bookings = bookingService.get(user.getId());
         assertEquals(1, bookings.size());
@@ -297,45 +298,37 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void getAllUserBookingsFromMinus2() {
-        when(mockUserRepository.findById(anyLong()))
-                .thenReturn(Optional.ofNullable(user));
-        List<BookingDto> dtos = bookingService.getAllUserBookings(user.getId(), booking.getState().toString(), -2, 10);
-        assertEquals(0, dtos.size());
-    }
-
-    @Test
     void getAllUserBookingsFromNegative() {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        final ItemsAvailabilityException e = assertThrows(ItemsAvailabilityException.class,
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
                 () -> bookingService.getAllUserBookings(user.getId(), booking.getState().toString(), -1, 10));
-        assertEquals("Invalid paging size", e.getMessage());
+        assertEquals("Page index must not be less than zero", e.getMessage());
     }
 
     @Test
     void getAllUserBookingsSizeNegative() {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        final ItemsAvailabilityException e = assertThrows(ItemsAvailabilityException.class,
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
                 () -> bookingService.getAllUserBookings(user.getId(), booking.getState().toString(), 1, -3));
-        assertEquals("Invalid paging size", e.getMessage());
+        assertEquals("Page size must not be less than one", e.getMessage());
     }
 
     @Test
     void getAllUserBookingsSizeAndFromZeros() {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        final ItemsAvailabilityException e = assertThrows(ItemsAvailabilityException.class,
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
                 () -> bookingService.getAllUserBookings(user.getId(), booking.getState().toString(), 0, 0));
-        assertEquals("Invalid paging size", e.getMessage());
+        assertEquals("Page size must not be less than one", e.getMessage());
     }
 
     @Test
     void getAllUserBookingsAll() {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(mockBookingRepository.findByBooker_IdOrderByStartDesc(anyLong()))
+        when(mockBookingRepository.findByBooker_IdOrderByStartDesc(anyLong(), any(Pageable.class)))
                 .thenReturn(List.of(booking, bookingApproved, bookingCancelled, bookingRejected));
         List<BookingDto> bookings = bookingService.getAllUserBookings(user.getId(),
                 "ALL", 0, 10);
@@ -354,7 +347,7 @@ public class BookingServiceImplTest {
     void getAllUserBookingsApproved() {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(mockBookingRepository.findByBooker_IdAndState(anyLong(), any(BookingStatus.class)))
+        when(mockBookingRepository.findByBooker_IdAndState(anyLong(), any(BookingStatus.class), any(Pageable.class)))
                 .thenReturn(List.of(bookingApproved));
         List<BookingDto> bookings = bookingService.getAllUserBookings(user.getId(),
                 "APPROVED", 0, 10);
@@ -370,7 +363,7 @@ public class BookingServiceImplTest {
     void getAllUserBookingsRejected() {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(mockBookingRepository.findByBooker_IdAndState(anyLong(), any(BookingStatus.class)))
+        when(mockBookingRepository.findByBooker_IdAndState(anyLong(), any(BookingStatus.class), any(Pageable.class)))
                 .thenReturn(List.of(bookingRejected));
         List<BookingDto> bookings = bookingService.getAllUserBookings(user.getId(),
                 "REJECTED", 0, 10);
@@ -386,7 +379,7 @@ public class BookingServiceImplTest {
     void getAllUserBookingsWaiting() {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(mockBookingRepository.findByBooker_IdAndState(anyLong(), any(BookingStatus.class)))
+        when(mockBookingRepository.findByBooker_IdAndState(anyLong(), any(BookingStatus.class), any(Pageable.class)))
                 .thenReturn(List.of(booking));
         List<BookingDto> bookings = bookingService.getAllUserBookings(user.getId(),
                 "WAITING", 0, 10);
@@ -403,7 +396,7 @@ public class BookingServiceImplTest {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
         when(mockBookingRepository.findByBooker_IdAndEndIsAfterAndStartIsBefore(anyLong(),
-                any(LocalDateTime.class), any(LocalDateTime.class)))
+                any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class)))
                 .thenReturn(List.of(bookingApproved, bookingCancelled));
         List<BookingDto> bookings = bookingService.getAllUserBookings(user.getId(),
                 "CURRENT", 0, 10);
@@ -425,7 +418,7 @@ public class BookingServiceImplTest {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
         when(mockBookingRepository.findByBooker_IdAndEndIsBeforeOrderByStartDesc(anyLong(),
-                any(LocalDateTime.class)))
+                any(LocalDateTime.class), any(Pageable.class)))
                 .thenReturn(List.of(bookingRejected));
         List<BookingDto> bookings = bookingService.getAllUserBookings(user.getId(),
                 "PAST", 0, 10);
@@ -442,7 +435,7 @@ public class BookingServiceImplTest {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
         when(mockBookingRepository.findByBooker_IdAndStartIsAfterOrderByStartDesc(anyLong(),
-                any(LocalDateTime.class)))
+                any(LocalDateTime.class), any(Pageable.class)))
                 .thenReturn(List.of(booking));
         List<BookingDto> bookings = bookingService.getAllUserBookings(user.getId(),
                 "FUTURE", 0, 10);
@@ -472,47 +465,38 @@ public class BookingServiceImplTest {
                         1, 10));
         assertEquals("User with ID=2 not found", e.getMessage());
     }
-
-    @Test
-    void getAllOwnerBookingsFromMinus2() {
-        when(mockUserRepository.findById(anyLong()))
-                .thenReturn(Optional.ofNullable(user));
-        List<BookingDto> dtos = bookingService.getAllOwnersBooking(user.getId(), booking.getState().toString(), -2, 10);
-        assertEquals(0, dtos.size());
-    }
-
     @Test
     void getAlOwnerBookingsFromNegative() {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        final ItemsAvailabilityException e = assertThrows(ItemsAvailabilityException.class,
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
                 () -> bookingService.getAllOwnersBooking(user.getId(), booking.getState().toString(), -1, 10));
-        assertEquals("Invalid paging size", e.getMessage());
+        assertEquals("Page index must not be less than zero", e.getMessage());
     }
 
     @Test
     void getAlOwnerBookingsSizeNegative() {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        final ItemsAvailabilityException e = assertThrows(ItemsAvailabilityException.class,
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
                 () -> bookingService.getAllOwnersBooking(user.getId(), booking.getState().toString(), 1, -3));
-        assertEquals("Invalid paging size", e.getMessage());
+        assertEquals("Page size must not be less than one", e.getMessage());
     }
 
     @Test
     void getAllOwnerBookingsSizeAndFromZeros() {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        final ItemsAvailabilityException e = assertThrows(ItemsAvailabilityException.class,
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
                 () -> bookingService.getAllOwnersBooking(user.getId(), booking.getState().toString(), 0, 0));
-        assertEquals("Invalid paging size", e.getMessage());
+        assertEquals("Page size must not be less than one", e.getMessage());
     }
 
     @Test
     void getAllOwnerBookingsAll() {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(mockBookingRepository.findByItem_OwnerIdOrderByStartDesc(anyLong()))
+        when(mockBookingRepository.findByItem_OwnerIdOrderByStartDesc(anyLong(), any(Pageable.class)))
                 .thenReturn(List.of(booking, bookingApproved, bookingCancelled, bookingRejected));
         List<BookingDto> bookings = bookingService.getAllOwnersBooking(user.getId(),
                 "ALL", 0, 10);
@@ -531,7 +515,7 @@ public class BookingServiceImplTest {
     void getAllOwnerBookingsApproved() {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(mockBookingRepository.findByItem_OwnerIdAndState(anyLong(), any(BookingStatus.class)))
+        when(mockBookingRepository.findByItem_OwnerIdAndState(anyLong(), any(BookingStatus.class), any(Pageable.class)))
                 .thenReturn(List.of(bookingApproved));
         List<BookingDto> bookings = bookingService.getAllOwnersBooking(user.getId(),
                 "APPROVED", 0, 10);
@@ -547,7 +531,7 @@ public class BookingServiceImplTest {
     void getAllOwnerBookingsRejected() {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(mockBookingRepository.findByItem_OwnerIdAndState(anyLong(), any(BookingStatus.class)))
+        when(mockBookingRepository.findByItem_OwnerIdAndState(anyLong(), any(BookingStatus.class), any(Pageable.class)))
                 .thenReturn(List.of(bookingRejected));
         List<BookingDto> bookings = bookingService.getAllOwnersBooking(user.getId(),
                 "REJECTED", 0, 10);
@@ -563,7 +547,7 @@ public class BookingServiceImplTest {
     void getAllOwnerBookingsWaiting() {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(mockBookingRepository.findByItem_OwnerIdAndState(anyLong(), any(BookingStatus.class)))
+        when(mockBookingRepository.findByItem_OwnerIdAndState(anyLong(), any(BookingStatus.class), any(Pageable.class)))
                 .thenReturn(List.of(booking));
         List<BookingDto> bookings = bookingService.getAllOwnersBooking(user.getId(),
                 "WAITING", 0, 10);
@@ -580,7 +564,7 @@ public class BookingServiceImplTest {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
         when(mockBookingRepository.findByItem_OwnerIdAndEndIsAfterAndStartIsBefore(anyLong(),
-                any(LocalDateTime.class), any(LocalDateTime.class)))
+                any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class)))
                 .thenReturn(List.of(bookingApproved, bookingCancelled));
         List<BookingDto> bookings = bookingService.getAllOwnersBooking(user.getId(),
                 "CURRENT", 0, 10);
@@ -602,7 +586,7 @@ public class BookingServiceImplTest {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
         when(mockBookingRepository.findByItem_OwnerIdAndEndIsBeforeOrderByStartDesc(anyLong(),
-                any(LocalDateTime.class)))
+                any(LocalDateTime.class), any(Pageable.class)))
                 .thenReturn(List.of(bookingRejected));
         List<BookingDto> bookings = bookingService.getAllOwnersBooking(user.getId(),
                 "PAST", 0, 10);
@@ -619,7 +603,7 @@ public class BookingServiceImplTest {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
         when(mockBookingRepository.findByItem_OwnerIdAndStartIsAfterOrderByStartDesc(anyLong(),
-                any(LocalDateTime.class)))
+                any(LocalDateTime.class), any(Pageable.class)))
                 .thenReturn(List.of(booking));
         List<BookingDto> bookings = bookingService.getAllOwnersBooking(user.getId(),
                 "FUTURE", 0, 10);

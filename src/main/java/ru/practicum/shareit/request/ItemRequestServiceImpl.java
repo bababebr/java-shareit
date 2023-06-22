@@ -44,6 +44,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
             ItemRequestDto dto = ItemRequestMapper.requestToDto(itemRequests.get(from));
             if (ir.getItem() != null) {
                 Item item = itemRepository.findById(ir.getItem().getId()).get();
+                item.setRequestId(ir.getId());
                 dto.getItems().add(item);
             }
             requestDtos.add(dto);
@@ -56,8 +57,10 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         userRepository.findById(userId).orElseThrow(() -> new NoSuchObjectException("User has not found."));
         ItemRequest itemRequest = requestRepository.findById(requestId).orElseThrow(() ->
                 new NoSuchObjectException("Request has not found."));
+        Item item = itemRepository.findById(itemRequest.getItem().getId()).get();
+        item.setRequestId(requestId);
         ItemRequestDto itemRequestDto = ItemRequestMapper.requestToDto(itemRequest);
-        itemRequestDto.getItems().add(itemRepository.findById(itemRequest.getItem()).get());
+        itemRequestDto.getItems().add(item);
         return itemRequestDto;
     }
 
@@ -68,7 +71,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
             for(ItemRequest ir : itemRequests) {
             ItemRequestDto dto = ItemRequestMapper.requestToDto(ir);
             if(ir.getItem() != null) {
-                Item item = itemRepository.findById(ir.getItem()).get();
+                Item item = itemRepository.findById(ir.getItem().getId()).get();
+                item.setRequestId(ir.getRequester().getId());
                 dto.getItems().add(item);
             }
             requestDtos.add(dto);

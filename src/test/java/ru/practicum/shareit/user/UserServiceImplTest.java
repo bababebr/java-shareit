@@ -10,6 +10,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.practicum.shareit.exception.NoSuchObjectException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 
@@ -21,6 +22,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
 
 @Transactional
 @SpringBootTest
@@ -48,7 +51,7 @@ class UserServiceImplTest {
 
     @Test
     void getAll() {
-        Mockito.when(mockUserRepository.findAll())
+        when(mockUserRepository.findAll())
                 .thenReturn(List.of(owner, booker));
         ArrayList<User> list = new ArrayList<>(UserMapper.userDtoToUser(userService.getAll()));
         Assertions.assertEquals(2, list.size());
@@ -56,14 +59,14 @@ class UserServiceImplTest {
 
     @Test
     void get() {
-        Mockito.when(mockUserRepository.findById(owner.getId()))
+        when(mockUserRepository.findById(owner.getId()))
                 .thenReturn(Optional.ofNullable(owner));
         Assertions.assertEquals(owner.getName(), userService.get(owner.getId()).getName());
     }
 
     @Test
     void getUserNotFound() {
-        Mockito.when(mockUserRepository.findById(999L))
+        when(mockUserRepository.findById(999L))
                 .thenThrow(new NoSuchElementException());
 
         final NoSuchElementException exception = assertThrows(
@@ -74,7 +77,7 @@ class UserServiceImplTest {
 
     @Test
     void create() {
-        Mockito.when(mockUserRepository.save(Mockito.any(User.class)))
+        when(mockUserRepository.save(Mockito.any(User.class)))
                 .thenReturn(owner);
         assertEquals(owner.getEmail(),userService.create(UserMapper.userToDto(owner)).getEmail());
         assertEquals(owner.getId(),userService.create(UserMapper.userToDto(owner)).getId());
@@ -84,9 +87,9 @@ class UserServiceImplTest {
     @Test
     void update() {
         UserDto updatedBooker = UserDto.create(booker.getId(), "updatedBooker", booker.getEmail());
-        Mockito.when(mockUserRepository.findById(booker.getId()))
+        when(mockUserRepository.findById(booker.getId()))
                 .thenReturn(Optional.ofNullable(booker));
-        Mockito.when(mockUserRepository.save(Mockito.any(User.class)))
+        when(mockUserRepository.save(Mockito.any(User.class)))
                         .then(invocationOnMock -> {
                             User user = invocationOnMock.getArgument(0, User.class);
 
@@ -103,7 +106,20 @@ class UserServiceImplTest {
 
     @Test
     void delete() {
+        when(mockUserRepository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(owner));
+        UserDto dto = userService.delete(owner.getId());
+        assertEquals(owner.getId(), dto.getId());
+        assertEquals(owner.getName(), dto.getName());
+        assertEquals(owner.getEmail(), dto.getEmail());
+    }
 
-
+    @Test
+    void deleteNotFound() {
+        when(mockUserRepository.findById(anyLong()))
+                .thenThrow(new NoSuchObjectException("User not found"));
+        final NoSuchObjectException e = assertThrows(NoSuchObjectException.class,
+                () -> userService.delete(owner.getId()));
+        assertEquals(e.getMessage(), "User not found");
     }
 }

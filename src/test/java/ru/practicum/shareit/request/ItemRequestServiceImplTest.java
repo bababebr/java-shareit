@@ -61,8 +61,8 @@ class ItemRequestServiceImplTest {
         startPast = LocalDateTime.now().minusHours(1);
         end = LocalDateTime.now().plusHours(2);
 
-        itemRequestDto = ItemRequestDto.create(1L, "request 1", startFuture, new ArrayList<>(), user.getId());
-        itemRequest = ItemRequest.create(1L, "request 1", startFuture, user.getId(), item.getId());
+        itemRequestDto = ItemRequestDto.create(1L, "request 1", startFuture, new ArrayList<>());
+        itemRequest = ItemRequest.create(1L, "request 1", startFuture, user, item);
     }
 
     @Test
@@ -84,7 +84,6 @@ class ItemRequestServiceImplTest {
         assertEquals(itemRequest.getId(), dto.getId());
         assertEquals(itemRequest.getCreated(), dto.getCreated());
         assertEquals(itemRequest.getDescription(), dto.getDescription());
-        assertEquals(itemRequest.getRequesterId(), dto.getRequesterId());
     }
 
     @Test
@@ -97,38 +96,30 @@ class ItemRequestServiceImplTest {
     }
 
     @Test
-    void getUsersAllSizeMinus2() {
-        when(mockUserRepository.findById(anyLong()))
-                .thenReturn(Optional.ofNullable(user));
-        List list = requestService.getUsersAll(user.getId(), -2, 10);
-        assertEquals(list.size(), 0);
-    }
-
-    @Test
     void getUsersAllFromNegative() {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        final ItemsAvailabilityException e = assertThrows(ItemsAvailabilityException.class,
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
                 () -> requestService.getUsersAll(user.getId(), -10, 10));
-        assertEquals("Invalid paging size", e.getMessage());
+        assertEquals("Page index must not be less than zero", e.getMessage());
     }
 
     @Test
     void getUsersAllSizeNegative() {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        final ItemsAvailabilityException e = assertThrows(ItemsAvailabilityException.class,
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
                 () -> requestService.getUsersAll(user.getId(), 10, -10));
-        assertEquals("Invalid paging size", e.getMessage());
+        assertEquals("Page size must not be less than one", e.getMessage());
     }
 
     @Test
     void getUsersAllSizeAndFromZeros() {
         when(mockUserRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        final ItemsAvailabilityException e = assertThrows(ItemsAvailabilityException.class,
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
                 () -> requestService.getUsersAll(user.getId(), 0, 0));
-        assertEquals("Invalid paging size", e.getMessage());
+        assertEquals("Page size must not be less than one", e.getMessage());
     }
 
     @Test
@@ -152,7 +143,6 @@ class ItemRequestServiceImplTest {
         assertEquals(list.size(), 1);
         assertEquals(list.get(0).getItems().isEmpty(), true);
         assertEquals(list.get(0).getId(), itemRequest.getId());
-        assertEquals(list.get(0).getRequesterId(), itemRequest.getRequesterId());
         assertEquals(list.get(0).getDescription(), itemRequest.getDescription());
         assertEquals(list.get(0).getCreated(), itemRequest.getCreated());
     }
@@ -169,7 +159,6 @@ class ItemRequestServiceImplTest {
         assertEquals(list.size(), 1);
         assertEquals(list.get(0).getItems().isEmpty(), false);
         assertEquals(list.get(0).getId(), itemRequest.getId());
-        assertEquals(list.get(0).getRequesterId(), itemRequest.getRequesterId());
         assertEquals(list.get(0).getDescription(), itemRequest.getDescription());
         assertEquals(list.get(0).getCreated(), itemRequest.getCreated());
     }
@@ -211,39 +200,32 @@ class ItemRequestServiceImplTest {
         assertEquals(itemRequestDto.getId(), request.getId());
         assertEquals(itemRequestDto.getCreated(), request.getCreated());
         assertEquals(itemRequestDto.getDescription(), request.getDescription());
-        assertEquals(itemRequestDto.getRequesterId(), request.getRequesterId());
-    }
-
-    @Test
-    void getOtherRequestFromMinus2() {
-        List list = requestService.getOtherRequest(user.getId(), -2, 10);
-        assertEquals(list.size(), 0);
     }
 
     @Test
     void getOtherRequestFromNegative() {
-        final ItemsAvailabilityException e = assertThrows(ItemsAvailabilityException.class,
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
                 () -> requestService.getOtherRequest(user.getId(), -1, 10));
-        assertEquals("Invalid paging size", e.getMessage());
+        assertEquals("Page index must not be less than zero", e.getMessage());
     }
 
     @Test
     void getOtherRequestSizeNegative() {
-        final ItemsAvailabilityException e = assertThrows(ItemsAvailabilityException.class,
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
                 () -> requestService.getOtherRequest(user.getId(), 0, -1));
-        assertEquals("Invalid paging size", e.getMessage());
+        assertEquals("Page size must not be less than one", e.getMessage());
     }
 
     @Test
     void getOtherRequestSizAndFromZeros() {
-        final ItemsAvailabilityException e = assertThrows(ItemsAvailabilityException.class,
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
                 () -> requestService.getOtherRequest(user.getId(), 0, 0));
-        assertEquals("Invalid paging size", e.getMessage());
+        assertEquals("Page size must not be less than one", e.getMessage());
     }
 
     @Test
     void getOtherIsNull() {
-        when(mockRequestRepository.findAllByRequesterIdIsNot(anyLong()))
+        when(mockRequestRepository.findAllByRequesterIdIsNot(anyLong(), any(Pageable.class)))
                 .thenReturn(List.of(itemRequest));
         itemRequest.setItem(null);
         List<ItemRequestDto> itemRequestDtos = requestService.getOtherRequest(user.getId(), 0, 10);
@@ -252,7 +234,7 @@ class ItemRequestServiceImplTest {
 
     @Test
     void getOther() {
-        when(mockRequestRepository.findAllByRequesterIdIsNot(anyLong()))
+        when(mockRequestRepository.findAllByRequesterIdIsNot(anyLong(), any(Pageable.class)))
                 .thenReturn(List.of(itemRequest));
         when(mockItemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
