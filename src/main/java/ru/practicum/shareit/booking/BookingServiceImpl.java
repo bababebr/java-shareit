@@ -15,8 +15,6 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -88,7 +86,7 @@ public class BookingServiceImpl implements BookingService {
             case "ALL":
                 bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdOrderByStartDesc(userId,
                         Pageable.unpaged()));
-                if((bookingDtos.size() - from) < size) {
+                if ((bookingDtos.size() - from) < size) {
                     size = bookingDtos.size() - from;
                 }
                 pageRequest = PageRequest.of(from, size);
@@ -100,8 +98,8 @@ public class BookingServiceImpl implements BookingService {
                         BookingStatus.APPROVED, pageRequest));
                 return bookingDtos;
             case "REJECTED":
-                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdAndState(userId
-                        , BookingStatus.REJECTED, pageRequest));
+                bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdAndState(userId,
+                        BookingStatus.REJECTED, pageRequest));
                 return bookingDtos;
             case "WAITING":
                 bookingDtos = BookingMapper.bookingDtos(bookingRepository.findByBooker_IdAndState(userId,
@@ -152,13 +150,13 @@ public class BookingServiceImpl implements BookingService {
                         userId, LocalDateTime.now(), LocalDateTime.now(), pageRequest));
                 return bookingDtos;
             case "PAST":
-                bookingDtos = BookingMapper.bookingDtos(bookingRepository.
-                        findByItem_OwnerIdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now(),
+                bookingDtos = BookingMapper.bookingDtos(bookingRepository
+                        .findByItem_OwnerIdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now(),
                                 pageRequest));
                 return bookingDtos;
             case "FUTURE":
-                bookingDtos = BookingMapper.bookingDtos(bookingRepository.
-                        findByItem_OwnerIdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now(),
+                bookingDtos = BookingMapper.bookingDtos(bookingRepository
+                        .findByItem_OwnerIdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now(),
                                 pageRequest));
                 return bookingDtos;
             default:

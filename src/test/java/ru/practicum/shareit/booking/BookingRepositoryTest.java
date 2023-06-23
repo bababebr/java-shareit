@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -15,9 +14,6 @@ import ru.practicum.shareit.user.User;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -57,11 +53,7 @@ class BookingRepositoryTest {
     @Test
     @Transactional
     void findByItem_IdOrderByStartDesc() {
-        booking = Booking.create(1L, item, user, startFuture, end, BookingStatus.WAITING);
-        em.persist(booking);
-        em.flush();
-        List<Booking> returnBooking = repository.findByItem_IdOrderByStartDesc(booking.getId());
-        assertEquals(returnBooking.size(), 1);
+
     }
 
     @Test

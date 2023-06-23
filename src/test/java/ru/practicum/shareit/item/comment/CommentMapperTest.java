@@ -9,16 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserDto;
-import ru.practicum.shareit.user.UserMapper;
 
 import javax.transaction.Transactional;
-
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Transactional
 @SpringBootTest
@@ -31,6 +26,7 @@ class CommentMapperTest {
     private Comment comment;
     private CommentDTO commentDTO;
     private LocalDateTime created = LocalDateTime.now();
+
     @BeforeEach
     void setUp() {
         user = User.create(1L, "user", "user@email.ru");

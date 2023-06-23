@@ -1,11 +1,9 @@
 package ru.practicum.shareit.request;
 
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.user.User;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class ItemRequestMapper {
 

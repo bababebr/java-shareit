@@ -8,7 +8,6 @@ import org.springframework.boot.test.json.JsonContent;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserDto;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
