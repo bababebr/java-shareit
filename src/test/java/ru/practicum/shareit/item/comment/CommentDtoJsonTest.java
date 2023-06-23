@@ -13,10 +13,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @JsonTest
-class CommentDTOTest {
+class CommentDtoJsonTest {
     @Autowired
     private JacksonTester<CommentDTO> json;
 
@@ -24,7 +23,6 @@ class CommentDTOTest {
     void create() throws IOException {
         LocalDateTime created = LocalDateTime.now();
         User user = User.create(1L, "user 1", "email1");
-        Item item = Item.create(1L, user, true, "item 1", "item 1", 1L);
         CommentDTO commentDto = CommentDTO.create(1L, "comment", user.getName(), created);
         JsonContent<CommentDTO> result = json.write(commentDto);
 
