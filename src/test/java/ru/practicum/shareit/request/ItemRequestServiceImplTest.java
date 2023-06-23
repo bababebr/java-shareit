@@ -54,13 +54,11 @@ class ItemRequestServiceImplTest {
     void setUp() {
         requestService = new ItemRequestServiceImpl(mockRequestRepository, mockItemRepository, mockUserRepository);
         user = User.create(1L, "user", "user@mail.ru");
-
         owner = User.create(2L, "owner", "owner@mail.ru");
         item = Item.create(1L, owner, true, "Item 1", "Item", null);
         startFuture = LocalDateTime.now().plusHours(1);
         startPast = LocalDateTime.now().minusHours(1);
         end = LocalDateTime.now().plusHours(2);
-
         itemRequestDto = ItemRequestDto.create(1L, "request 1", startFuture, new ArrayList<>());
         itemRequest = ItemRequest.create(1L, "request 1", startFuture, user, item);
     }

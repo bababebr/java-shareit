@@ -8,13 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ItemRequestMapper {
-    public static ItemRequestDto requestToDto(ItemRequest itemRequest, List<Item> itemsList) {
-        ItemRequestDto itemRequestDto = ItemRequestDto.create(itemRequest.getId(),
-                itemRequest.getDescription(),
-                itemRequest.getCreated(),
-                itemsList);
-        return itemRequestDto;
-    }
 
     public static ItemRequestDto requestToDto(ItemRequest itemRequest) {
         ItemRequestDto itemRequestDto = ItemRequestDto.create(itemRequest.getId(),
