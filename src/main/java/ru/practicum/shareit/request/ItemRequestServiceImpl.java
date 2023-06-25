@@ -26,7 +26,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public ItemRequestDto addItem(ItemRequestDto itemRequestDto, Long userId) {
-        User requester =userRepository.findById(userId).orElseThrow(() -> new NoSuchObjectException("User has not found."));
+        User requester = userRepository.findById(userId).orElseThrow(() -> new NoSuchObjectException("User has not found."));
         itemRequestDto.setCreated(LocalDateTime.now());
         ItemRequest itemRequest = requestRepository.save(ItemRequestMapper.dtoToRequest(itemRequestDto, requester));
         return ItemRequestMapper.requestToDto(itemRequest);
@@ -40,7 +40,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
             return new ArrayList<>();
         }
         List<ItemRequestDto> requestDtos = new ArrayList<>();
-        for(ItemRequest ir : itemRequests) {
+        for (ItemRequest ir : itemRequests) {
             ItemRequestDto dto = ItemRequestMapper.requestToDto(itemRequests.get(from));
             if (ir.getItem() != null) {
                 Item item = itemRepository.findById(ir.getItem().getId()).get();
@@ -68,9 +68,9 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public List<ItemRequestDto> getOtherRequest(Long userId, int from, int size) {
         List<ItemRequest> itemRequests = requestRepository.findAllByRequesterIdIsNot(userId, PageRequest.of(from, size));
         List<ItemRequestDto> requestDtos = new ArrayList<>();
-            for(ItemRequest ir : itemRequests) {
+        for (ItemRequest ir : itemRequests) {
             ItemRequestDto dto = ItemRequestMapper.requestToDto(ir);
-            if(ir.getItem() != null) {
+            if (ir.getItem() != null) {
                 Item item = itemRepository.findById(ir.getItem().getId()).get();
                 item.setRequestId(ir.getRequester().getId());
                 dto.getItems().add(item);

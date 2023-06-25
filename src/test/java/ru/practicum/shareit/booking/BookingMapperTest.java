@@ -38,6 +38,7 @@ class BookingMapperTest {
         booking = Booking.create(1L, item, user, start, end, BookingStatus.APPROVED);
         bookingDto = BookingDto.create(1L, item.getId(), item, user, start, end, BookingStatus.APPROVED);
     }
+
     @Test
     void bookingToBookingDto() {
         BookingDto dto = BookingMapper.bookingToBookingDto(booking);

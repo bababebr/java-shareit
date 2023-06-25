@@ -8,7 +8,6 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Pageable;
-import ru.practicum.shareit.exception.ItemsAvailabilityException;
 import ru.practicum.shareit.exception.NoSuchObjectException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.ItemRepository;
