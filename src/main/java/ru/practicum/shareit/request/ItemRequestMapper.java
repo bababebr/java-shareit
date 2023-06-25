@@ -19,8 +19,7 @@ public class ItemRequestMapper {
         ItemRequest itemRequest = ItemRequest.create(itemRequestDto.getId(),
                 itemRequestDto.getDescription(),
                 itemRequestDto.getCreated(),
-                requester,
-                null);
+                requester);
         return itemRequest;
     }
 
