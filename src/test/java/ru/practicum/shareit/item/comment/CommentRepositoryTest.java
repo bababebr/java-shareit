@@ -39,6 +39,7 @@ class CommentRepositoryTest {
         userRepository.save(owner);
         itemRepository.save(item);
     }
+
     @Test
     void findAllByItemId() {
         repository.save(comment);

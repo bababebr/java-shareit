@@ -30,6 +30,7 @@ class RequestRepositoryTest {
     private LocalDateTime created;
     private ItemRequest request;
     private ItemRequest request2;
+
     @BeforeEach
     void setUp() {
         created = LocalDateTime.now();

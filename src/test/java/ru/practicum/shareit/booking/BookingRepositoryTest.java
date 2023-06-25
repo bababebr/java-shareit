@@ -53,7 +53,6 @@ class BookingRepositoryTest {
         bookingCancelled = Booking.create(3L, item, user, startPast, end, BookingStatus.CANCELLED);
         bookingRejected = Booking.create(4L, item, owner, startPast, startPast.plusMinutes(3), BookingStatus.REJECTED);
         bookingDto = BookingDto.create(1L, item.getId(), item, user, startFuture, end, BookingStatus.WAITING);
-
     }
 
     @Test
