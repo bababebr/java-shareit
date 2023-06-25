@@ -3,15 +3,12 @@ package ru.practicum.shareit.item;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import ru.practicum.shareit.exception.ExceptionsHandler;
 import ru.practicum.shareit.exception.NoSuchObjectException;
 import ru.practicum.shareit.item.comment.CommentDTO;
 import ru.practicum.shareit.item.dto.ItemBookingHistoryDto;
@@ -34,34 +31,26 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(ItemController.class)
 class ItemControllerTest {
-    @Mock
+    @MockBean
     private ItemService itemService;
-    @InjectMocks
-    private ItemController controller;
     private final ObjectMapper mapper = new ObjectMapper();
+    @Autowired
     private MockMvc mvc;
-
     private ItemDto itemDto1True;
     private ItemDto itemDto2False;
     private ItemDto itemDto3True;
-
     private Item item1;
     private Item item2;
     private UserDto userDto1 = UserDto.create(1L, "user 1", "user 1");
     private UserDto userDto2 = UserDto.create(2L, "user 2", "user 2");
     private User user1 = User.create(1L, "user 1", "user 1");
     private User user2 = User.create(2L, "user 2", "user 2");
-
     private CommentDTO commentDTO;
 
     @BeforeEach
     void setUp() {
-        mvc = MockMvcBuilders
-                .standaloneSetup(controller)
-                .setControllerAdvice(ExceptionsHandler.class)
-                .build();
         itemDto1True = ItemDto.create(1L, "item 1", "item 1", true, null);
         itemDto2False = ItemDto.create(2L, "item 2", "item 2", false, null);
         itemDto3True = ItemDto.create(3L, "item 3", "item 3", true, null);
