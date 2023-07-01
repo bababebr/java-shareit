@@ -1,6 +1,9 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import javax.validation.constraints.NotBlank;
@@ -18,4 +21,5 @@ public class ItemDto {
     String description;
     @NotNull(message = "available cannot be null.")
     Boolean available;
+    Long requestId;
 }

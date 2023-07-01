@@ -15,7 +15,8 @@ public final class ItemMapper {
         return ItemDto.create(item.getId(),
                 item.getName(),
                 item.getDescription(),
-                item.getAvailable());
+                item.getAvailable(),
+                item.getRequestId());
     }
 
     public static ItemBookingHistoryDto itemBookingHistoryDto(Item item) {
@@ -25,7 +26,8 @@ public final class ItemMapper {
                 item.getAvailable(),
                 null,
                 null,
-                new ArrayList<>());
+                new ArrayList<>(),
+                item.getRequestId());
     }
 
     public static Item dtoToItem(ItemDto itemDto, User owner) {
@@ -33,6 +35,7 @@ public final class ItemMapper {
                 owner,
                 itemDto.getAvailable(),
                 itemDto.getDescription(),
-                itemDto.getName());
+                itemDto.getName(),
+                itemDto.getRequestId());
     }
 }

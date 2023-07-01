@@ -28,4 +28,6 @@ public class Item {
     String description;
     @Column(name = "name")
     String name;
+    @Transient
+    Long requestId;
 }

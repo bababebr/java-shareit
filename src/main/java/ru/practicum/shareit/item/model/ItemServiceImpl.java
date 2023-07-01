@@ -15,6 +15,8 @@ import ru.practicum.shareit.item.comment.CommentMapper;
 import ru.practicum.shareit.item.comment.CommentRepository;
 import ru.practicum.shareit.item.dto.ItemBookingHistoryDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.RequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
@@ -26,12 +28,13 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-class ItemServiceImpl implements ItemService {
+public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository repository;
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final RequestRepository requestRepository;
 
     @Override
     @Transactional
@@ -39,6 +42,12 @@ class ItemServiceImpl implements ItemService {
         User user = userRepository.findById(ownerId).orElseThrow(() ->
                 new NoSuchObjectException(String.format("There is no User with ID=%s.", ownerId)));
         Item item = repository.save(ItemMapper.dtoToItem(itemDto, user));
+        if (itemDto.getRequestId() != null) {
+            ItemRequest itemRequest = requestRepository.findById(itemDto.getRequestId()).get();
+            itemRequest.setItem(item);
+            requestRepository.save(itemRequest);
+            item.setRequestId(itemRequest.getId());
+        }
         return ItemMapper.itemToDto(item);
     }
 
