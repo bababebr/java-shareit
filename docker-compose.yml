@@ -1,14 +1,17 @@
 version: '3.8'
 services:
-  gateway:
-    build: .
-    image: amazoncorretto:11
-    container_name: gateway
-    ports:
-      - "8080:8080"
-    environment:
-      - SHAREIT_SERVER_URL=http://server:9090
-
+  db:
+     image: postgres:13.7-alpine
+     container_name:
+       db
+     ports:
+       - "6541:5432"
+     environment:
+       - DB_NAME=postgres
+       - POSTGRES_USER=postgres
+       - POSTGRES_PASSWORD=root
+       - DB_HOST=localhost
+       - DB_PORT=5432
   server:
     build: .
     image: amazoncorretto:11
@@ -18,19 +21,20 @@ services:
     depends_on:
       - db
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:6541/shareit
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:6541/postgres
       - DATASOURCE_LOGIN=postgres
       - DATASOURCE_PASSWORD=root
-
-  db:
-    image: postgres:13.7-alpine
-    container_name:
-      db
+    tty: true
+  gateway:
+    build: .
+    image: amazoncorretto:11
+    container_name: gateway
+    depends_on:
+      - server
     ports:
-      - "6541:5432"
+      - "8080:8080"
     environment:
-      - DB_NAME=shareit
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=root
-      - DB_HOST=localhost
-      - DB_PORT=5432
+      - SHAREIT_SERVER_URL=http://server:9090
+    tty: true
+
+
