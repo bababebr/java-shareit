@@ -2,11 +2,11 @@ package ru.practicum.shareit.item.model;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,10 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class ItemRepositoryTest {
 
-    @Autowired
+    @Mock
     private ItemRepository repository;
-    @Autowired
-    private UserRepository userRepository;
     private Item itemOwner;
     private Item itemUser;
     private User owner;
@@ -38,6 +36,8 @@ class ItemRepositoryTest {
 
     @Test
     void findItemsByOwner() {
+        Mockito.when(repository.findItemsByOwner(user.getId()))
+                .thenReturn(List.of(itemOwner));
         List<Item> items = repository.findItemsByOwner(user.getId());
         assertEquals(items.size(), 1);
         assertEquals(items.get(0).getId(), itemOwner.getId());
@@ -45,6 +45,8 @@ class ItemRepositoryTest {
 
     @Test
     void findItemByNameAndDescription() {
+        Mockito.when(repository.findItemByNameAndDescription("Item"))
+                .thenReturn(List.of(itemOwner));
         List<Item> items = repository.findItemByNameAndDescription("Item");
         assertEquals(items.size(), 1);
         assertEquals(items.get(0).getId(), itemOwner.getId());

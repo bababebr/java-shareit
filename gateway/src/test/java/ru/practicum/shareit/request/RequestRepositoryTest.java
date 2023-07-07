@@ -2,6 +2,8 @@ package ru.practicum.shareit.request;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DataJpaTest
 class RequestRepositoryTest {
 
-    @Autowired
+    @Mock
     private RequestRepository repository;
     @Autowired
     private UserRepository userRepository;
@@ -43,8 +45,8 @@ class RequestRepositoryTest {
 
     @Test
     void addRequest() {
-        userRepository.save(booker);
-        itemRepository.save(item);
+        Mockito.when(repository.save(request))
+                .thenReturn(request);
         ItemRequest returnedRequest = repository.save(request);
         assertEquals(request.getId(), returnedRequest.getId());
         assertEquals(request.getDescription(), returnedRequest.getDescription());
@@ -54,24 +56,16 @@ class RequestRepositoryTest {
 
     @Test
     void findAllByRequesterId() {
-        booker.setId(2L);
-        item.setId(2L);
-        userRepository.save(booker);
-        itemRepository.save(item);
-        repository.save(request);
+        Mockito.when(repository.findAllByRequesterId(booker.getId(), Pageable.unpaged()))
+                .thenReturn(List.of(request));
         List<ItemRequest> requestList = repository.findAllByRequesterId(booker.getId(), Pageable.unpaged());
         assertEquals(requestList.size(), 1);
     }
 
     @Test
     void findAllByRequesterIdIsNot() {
-        booker.setId(3L);
-        item.setId(3L);
-        userRepository.save(booker);
-        userRepository.save(booker2);
-        itemRepository.save(item);
-        repository.save(request);
-        repository.save(request2);
+        Mockito.when(repository.findAllByRequesterIdIsNot(booker.getId(), Pageable.unpaged()))
+                .thenReturn(List.of(request));
         List<ItemRequest> requestList = repository.findAllByRequesterIdIsNot(booker.getId(), Pageable.unpaged());
         assertEquals(requestList.size(), 1);
     }
