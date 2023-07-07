@@ -3,31 +3,24 @@ services:
   db:
      image: postgres:13.7-alpine
      container_name:
-       db
+       shareit-db
      ports:
        - "6541:5432"
      environment:
-       - DB_NAME=postgres
        - POSTGRES_USER=postgres
-       - POSTGRES_PASSWORD=root
-       - DB_HOST=localhost
-       - DB_PORT=5432
+       - POSTGRES_PASSWORD=postgres
   server:
-    build: .
-    image: amazoncorretto:11
+    build: ./server
+    image: shareit-server
     container_name: server
     ports:
       - "9090:9090"
     depends_on:
       - db
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:6541/postgres
-      - DATASOURCE_LOGIN=postgres
-      - DATASOURCE_PASSWORD=root
-    tty: true
+
   gateway:
-    build: .
-    image: amazoncorretto:11
+    build: ./gateway
+    image: shareit-gateway
     container_name: gateway
     depends_on:
       - server
@@ -35,6 +28,3 @@ services:
       - "8080:8080"
     environment:
       - SHAREIT_SERVER_URL=http://server:9090
-    tty: true
-
-
