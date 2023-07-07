@@ -1,6 +1,7 @@
 package ru.practicum.shareit.client;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -12,18 +13,21 @@ import org.springframework.http.*;
 import org.springframework.lang.Nullable;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
+import ru.practicum.shareit.user.User;
 
 import javax.transaction.Transactional;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 @Transactional
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class BaseClientTest {
 
-    @InjectMocks
+    @Mock
     BaseClient client;
     @Mock
     RestTemplate rest;
@@ -35,11 +39,14 @@ class BaseClientTest {
 
     @Test
     void get() {
-        ResponseEntity<Object> response = new ResponseEntity<>("123", HttpStatus.ACCEPTED);
-        Map<String, Object> map = new HashMap<>();
-        Mockito.when(client.get("123", 1L, map)).thenAnswer(invocationOnMock -> {
-            return response;
-        });
+        User emp = User.create(1L, "name", "email");
+        Mockito
+                .when(client.get(
+                        "http://localhost:8080/users/1"))
+          .thenReturn(new ResponseEntity(emp, HttpStatus.OK));
+
+        User user = (User) client.get("http://localhost:8080/users/1").getBody();
+        Assertions.assertEquals(user.getId(), emp.getId());
     }
 
     @Test

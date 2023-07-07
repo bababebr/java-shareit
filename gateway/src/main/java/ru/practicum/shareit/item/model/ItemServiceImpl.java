@@ -77,6 +77,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public ItemBookingHistoryDto getItem(long itemId, long userId) {
         Item item = repository.findById(itemId).orElseThrow(() ->
                 new NoSuchObjectException(String.format("Item with ID=%s not found", itemId)));
@@ -92,12 +93,14 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public List<ItemBookingHistoryDto> getUsersOwnItems(long ownerId) {
         List<Item> items = repository.findItemsByOwner(ownerId);
         return items.stream().map(i -> getItem(i.getId(), ownerId)).collect(Collectors.toList());
     }
 
     @Override
+    @Transactional
     public List<ItemDto> searchItemByDescription(String searchText) {
         if (searchText.isBlank()) {
             return new ArrayList<>();

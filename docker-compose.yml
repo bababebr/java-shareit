@@ -9,10 +9,13 @@ services:
      environment:
        - POSTGRES_USER=postgres
        - POSTGRES_PASSWORD=postgres
+       - TZ=EUROPE/MOSCOW
   server:
     build: ./server
     image: shareit-server
     container_name: server
+    environment:
+      - TZ=EUROPE/MOSCOW
     ports:
       - "9090:9090"
     depends_on:
