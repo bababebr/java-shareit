@@ -98,6 +98,7 @@ class ItemServiceImplTest {
         final NoSuchObjectException exception = assertThrows(
                 NoSuchObjectException.class,
                 () -> itemService.addItem(itemDto1, owner.getId()));
+        assertEquals(exception.getMessage(), null);
     }
 
     @Test
@@ -109,7 +110,9 @@ class ItemServiceImplTest {
         final NullPointerException exception = assertThrows(
                 NullPointerException.class,
                 () -> itemService.addItem(itemDto1, owner.getId()));
+        assertEquals(exception.getMessage(), null);
     }
+
 
     @Test
     void updateItem() {
@@ -134,6 +137,7 @@ class ItemServiceImplTest {
         final NoSuchObjectException exception = assertThrows(
                 NoSuchObjectException.class,
                 () -> itemService.updateItem(itemDto1, owner.getId(), itemDto1.getId()));
+        assertEquals(exception.getMessage(), "There is no Item with ID=1.");
     }
 
     @Test

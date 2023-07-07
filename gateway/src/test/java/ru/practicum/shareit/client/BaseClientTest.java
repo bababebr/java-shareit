@@ -17,7 +17,6 @@ import org.springframework.web.client.RestTemplate;
 import ru.practicum.shareit.user.User;
 
 import javax.transaction.Transactional;
-
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -156,5 +155,22 @@ class BaseClientTest {
                 () -> baseClient.delete("users/1", 1L, param));
         assertEquals(new NullPointerException().getMessage(), e.getMessage());
     }
+
+/*    @Test
+    void httpStatusException() throws JsonProcessingException {
+        HashMap<String, Object> param = new HashMap<>();
+        User user = User.create(1L, "name", "email");
+        param.put("1", user);
+        Mockito.when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class)))
+                .thenThrow(new HttpStatusCodeException(HttpStatus.NOT_ACCEPTABLE) {
+                    @Override
+                    public HttpStatus getStatusCode() {
+                        return super.getStatusCode();
+                    }
+                });
+        final HttpStatusCodeException e = assertThrows(HttpStatusCodeException.class,
+                () -> baseClient.delete(""));
+        assertEquals(e.getStatusCode(), HttpStatus.NOT_ACCEPTABLE);
+    }*/
 
 }
