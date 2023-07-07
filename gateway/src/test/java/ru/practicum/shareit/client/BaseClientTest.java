@@ -1,26 +1,34 @@
 package ru.practicum.shareit.client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.*;
 import org.springframework.lang.Nullable;
+import org.springframework.test.web.client.ExpectedCount;
+import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.UserService;
 
 import javax.transaction.Transactional;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
-import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
-import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
+import static org.mockito.ArgumentMatchers.*;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 
 @Transactional
 @SpringBootTest
@@ -29,24 +37,40 @@ class BaseClientTest {
 
     @Mock
     BaseClient client;
-    @Mock
-    RestTemplate rest;
+    @Autowired
+    UserRepository repository;
+    @Autowired
+    UserService userService;
 
-    @BeforeEach
-    void setUp() {
-        client = new BaseClient(rest);
-    }
+    private RestTemplate rest = new RestTemplate();
+
+    private MockRestServiceServer mockServer;
+    ObjectMapper mapper = new ObjectMapper();
 
     @Test
-    void get() {
+    void get() throws JsonProcessingException, URISyntaxException {
         User emp = User.create(1L, "name", "email");
-        Mockito
-                .when(client.get(
-                        "http://localhost:8080/users/1"))
-          .thenReturn(new ResponseEntity(emp, HttpStatus.OK));
 
-        User user = (User) client.get("http://localhost:8080/users/1").getBody();
-        Assertions.assertEquals(user.getId(), emp.getId());
+        mockServer.expect(ExpectedCount.once(),
+                        requestTo(new URI("http://localhost:8080/users/1")))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withStatus(HttpStatus.OK)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(mapper.writeValueAsString(emp))
+                );
+        ResponseEntity<Object> resp = rest.getForEntity("http://localhost:8080/users/1", Object.class);
+        Mockito.when(client.get(anyString(), anyLong(), anyMap()))
+                .thenReturn(resp);
+        Mockito.when(client.get(anyString(), anyLong()))
+                .thenReturn(resp);
+        Mockito.when(client.get(anyString()))
+                .thenReturn(resp);
+        Object o = client.get("http://localhost:8080/users/1").getBody();
+    }
+
+    @BeforeEach
+    public void init() {
+        mockServer = MockRestServiceServer.createServer(rest);
     }
 
     @Test

@@ -19,7 +19,7 @@ public class BaseClient {
         this.rest = rest;
     }
 
-    protected ResponseEntity<Object> get(String path) {
+    public ResponseEntity<Object> get(String path) {
         return get(path, null, null);
     }
 
