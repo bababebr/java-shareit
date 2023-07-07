@@ -22,6 +22,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.ItemMapper;
 import ru.practicum.shareit.item.model.ItemRepository;
 import ru.practicum.shareit.item.model.ItemServiceImpl;
+import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.request.RequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
@@ -113,6 +114,26 @@ class ItemServiceImplTest {
         assertEquals(exception.getMessage(), null);
     }
 
+    @Test
+    void addItemNullRequest() {
+        ItemRequest itemRequest = ItemRequest.create(1L, "", LocalDateTime.now(), owner, item1);
+        when(mockUserRepository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(owner));
+        when(mockItemRepository.save(any(Item.class)))
+                .thenReturn(item1);
+        when(mockRequestRepository.findById(1L))
+                .thenReturn(Optional.ofNullable(itemRequest));
+        when(mockRequestRepository.save(any(ItemRequest.class)))
+                .thenReturn(itemRequest);
+        item1.setRequestId(1L);
+        itemDto1 = ItemMapper.itemToDto(item1);
+        ItemDto returnItem = itemService.addItem(itemDto1, owner.getId());
+        assertEquals(returnItem.getId(), itemDto1.getId());
+        assertEquals(returnItem.getAvailable(), itemDto1.getAvailable());
+        assertEquals(returnItem.getDescription(), itemDto1.getDescription());
+        assertEquals(returnItem.getRequestId(), itemDto1.getRequestId());
+        assertEquals(returnItem.getName(), itemDto1.getName());
+    }
 
     @Test
     void updateItem() {
