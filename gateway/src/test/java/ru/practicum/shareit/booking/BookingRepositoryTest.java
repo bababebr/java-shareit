@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataJpaTest
 @Transactional
-@Rollback(value = false)
+@Rollback(value = true)
 class BookingRepositoryTest {
     @Autowired
     private BookingRepository repository;
