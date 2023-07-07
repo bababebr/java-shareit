@@ -40,7 +40,6 @@ class BaseClientTest {
         Mockito.when(client.get("123", 1L, map)).thenAnswer(invocationOnMock -> {
             return response;
         });
-
     }
 
     @Test
