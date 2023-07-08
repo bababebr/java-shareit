@@ -13,9 +13,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import ru.practicum.shareit.exception.NoSuchObjectException;
-import ru.practicum.shareit.user.UserClient;
-import ru.practicum.shareit.user.UserController;
-import ru.practicum.shareit.user.UserDto;
 
 import javax.validation.ValidationException;
 import java.nio.charset.StandardCharsets;
@@ -149,7 +146,7 @@ class UserControllerTest {
         when(userService.addUser(any()))
                 .thenAnswer(invocationOnMock -> {
                     userDtos.add(invocationOnMock.getArgument(0, UserDto.class));
-                    return invocationOnMock.getArgument(0);
+                    return new ResponseEntity<>(userDto2, HttpStatus.OK);
                 });
         //add two Users
         mvc.perform(post("/users")
@@ -169,7 +166,7 @@ class UserControllerTest {
         when(userService.delete(anyLong()))
                 .thenAnswer(invocationOnMock -> {
                     userDtos.removeIf(u -> u.getId() == invocationOnMock.getArgument(0, Long.class));
-                    return userDto;
+                    return new ResponseEntity<>(userDto, HttpStatus.OK);
                 });
 
         mvc.perform(MockMvcRequestBuilders.delete("/users/{userId}", 2L)
