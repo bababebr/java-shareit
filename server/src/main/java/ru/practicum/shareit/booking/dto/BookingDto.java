@@ -9,6 +9,7 @@ import ru.practicum.shareit.user.User;
 
 import javax.validation.constraints.Future;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Past;
 import java.time.LocalDateTime;
 
 /**
@@ -29,6 +30,8 @@ public class BookingDto {
     @Future
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     LocalDateTime start;
+    @Future
+    @NotNull
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     LocalDateTime end;
     @NotNull
