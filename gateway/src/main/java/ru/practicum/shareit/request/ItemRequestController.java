@@ -1,46 +1,48 @@
 package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
 
 /**
  * TODO Sprint add-item-requests.
  */
-@RestController
+@Controller
 @RequestMapping(path = "/requests")
 @RequiredArgsConstructor
 @Validated
 public class ItemRequestController {
 
+    private final RequestClient requestClient;
 
-
-/*    @PostMapping
-    public ItemRequestDto add(@RequestHeader("X-Sharer-User-Id") Long userId,
+    @PostMapping
+    public ResponseEntity<Object> add(@RequestHeader("X-Sharer-User-Id") Long userId,
                               @Valid @RequestBody ItemRequestDto itemRequestDto) {
-        return itemRequestService.addItem(itemRequestDto, userId);
+        return requestClient.addItem(itemRequestDto, userId);
     }
 
     @GetMapping
-    public List<ItemRequestDto> getUsersAll(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public ResponseEntity<Object> getUsersAll(@RequestHeader("X-Sharer-User-Id") Long userId,
                                             @RequestParam(defaultValue = "0") @Min(0)  int from,
                                             @RequestParam(defaultValue = "10") @Min(1)  int size) {
-        return itemRequestService.getUsersAll(userId, from, size);
+        return requestClient.getUsersAll(userId, from, size);
     }
 
     @GetMapping("/all")
-    List<ItemRequestDto> getOtherRequest(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public ResponseEntity<Object> getOtherRequest(@RequestHeader("X-Sharer-User-Id") Long userId,
                                          @RequestParam(defaultValue = "0") @Min(0)  int from,
                                          @RequestParam(defaultValue = "10") @Min(1)  int size) {
-        return itemRequestService.getOtherRequest(userId, from, size);
+        return requestClient.getOtherRequest(userId, from, size);
     }
 
-
     @GetMapping("/{requestId}")
-    public ItemRequestDto get(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public ResponseEntity<Object>  get(@RequestHeader("X-Sharer-User-Id") Long userId,
                               @PathVariable long requestId) {
-        return itemRequestService.get(userId, requestId);
-    }*/
-
+        return requestClient.get(userId, requestId);
+    }
 }

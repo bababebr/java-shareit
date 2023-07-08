@@ -13,6 +13,7 @@ import javax.validation.Valid;
 public class ItemController {
 
     private final ItemClient itemClient;
+
     @PostMapping
     public ResponseEntity<Object> add(@RequestHeader("X-Sharer-User-Id") Long userId,
                                       @Valid @RequestBody ItemDto itemDto) {
@@ -25,6 +26,8 @@ public class ItemController {
                                          @PathVariable long itemId) {
         return itemClient.update(userId, itemId, itemDto);
     }
+
+
     @GetMapping("/{itemId}")
     public ResponseEntity<Object> get(@RequestHeader("X-Sharer-User-Id") long userId,
                                      @PathVariable long itemId) {
