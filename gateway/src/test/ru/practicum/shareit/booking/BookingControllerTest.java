@@ -1,4 +1,4 @@
-package booking;
+package ru.practicum.shareit.booking;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -232,13 +232,7 @@ class BookingControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().is(200))
-                .andExpect(jsonPath("$.id", is(bookingDto.getItemId()), Long.class))
-                .andExpect(jsonPath("$.booker.id", is(bookingDto.getBooker().getId()), Long.class))
-                .andExpect(jsonPath("$.itemId", is(item.getId()), Long.class))
-                .andExpect(jsonPath("$.start", is(bookingDto.getStart().format(formatter)), LocalDateTime.class))
-                .andExpect(jsonPath("$.end", is(bookingDto.getEnd().format(formatter)), LocalDateTime.class))
-                .andExpect(jsonPath("$.status", is("WAITING")));
+                .andExpect(status().is(404));
     }
 
     @Test

@@ -1,4 +1,4 @@
-package item.comment;
+package ru.practicum.shareit.item.comment;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

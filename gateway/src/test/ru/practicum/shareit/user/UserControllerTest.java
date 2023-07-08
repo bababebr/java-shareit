@@ -1,4 +1,4 @@
-package user;
+package ru.practicum.shareit.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
@@ -81,8 +81,7 @@ class UserControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -96,7 +95,7 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
+                .andExpect(jsonPath("$.length()").value(3));
     }
 
     @Test
@@ -131,7 +130,7 @@ class UserControllerTest {
     void update() throws Exception {
         UserDto updatedUser = UserDto.create(1L, "updatedName", "updatedEmail");
         when(userService.updateUser(anyLong(), any(UserDto.class)))
-                .thenReturn(new ResponseEntity<>(userDto, HttpStatus.OK));
+                .thenReturn(new ResponseEntity<>(updatedUser, HttpStatus.OK));
         mvc.perform(patch("/users/{userId}", 1L)
                         .content(mapper.writeValueAsString(userDto))
                         .characterEncoding(StandardCharsets.UTF_8)

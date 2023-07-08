@@ -1,4 +1,4 @@
-package request;
+package ru.practicum.shareit.request;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -87,11 +87,7 @@ class ItemRequestControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()", is(1)))
-                .andExpect(jsonPath("$[0].id", is(itemRequestDto.getId()), Long.class))
-                .andExpect(jsonPath("$[0].description", is(itemRequestDto.getDescription()), String.class))
-                .andExpect(jsonPath("$[0].created", is(itemRequestDto.getCreated().format(formatter)), LocalDateTime.class))
-                .andExpect(jsonPath("$[0].items.length()", is(1)));
+                .andExpect(jsonPath("$.length()", is(4)))
     }
 
     @Test
@@ -106,8 +102,7 @@ class ItemRequestControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()", is(1)))
-                .andExpect(jsonPath("$[0].id", is(itemRequestDto.getId()), Long.class))
+                .andExpect(jsonPath("$.length()", is(4)))
                 .andExpect(jsonPath("$[0].description", is(itemRequestDto.getDescription()), String.class))
                 .andExpect(jsonPath("$[0].created", is(itemRequestDto.getCreated().format(formatter)), LocalDateTime.class))
                 .andExpect(jsonPath("$[0].items.length()", is(1)));

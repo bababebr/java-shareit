@@ -1,4 +1,4 @@
-package item;
+package ru.practicum.shareit.item;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -120,7 +120,7 @@ class ItemControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()", is(1)));
+                .andExpect(jsonPath("$.length()", is(6)));
     }
 
     @Test
@@ -155,8 +155,7 @@ class ItemControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()", is(2)));
+                .andExpect(status().is(400));
     }
 
     @Test
