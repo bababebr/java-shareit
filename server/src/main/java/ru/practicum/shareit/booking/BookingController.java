@@ -2,8 +2,12 @@ package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.booking.dto.BookingDto;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/bookings")
@@ -11,8 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 public class BookingController {
 
+    private final BookingService bookingService;
 
-/*    @PostMapping
+    @PostMapping
     public BookingDto add(@RequestHeader("X-Sharer-User-Id") Long bookerId,
                           @Valid @RequestBody BookingDto booking) {
         return bookingService.add(bookerId, booking);
@@ -45,5 +50,5 @@ public class BookingController {
                                              @RequestParam (defaultValue = "0") @Min(0) int from,
                                              @RequestParam(defaultValue = "10") @Min(1) int size) {
         return bookingService.getAllOwnersBooking(userId, state, from, size);
-    }*/
+    }
 }

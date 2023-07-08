@@ -2,8 +2,12 @@ package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.request.dto.ItemRequestDto;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import java.util.List;
 
 /**
  * TODO Sprint add-item-requests.
@@ -14,9 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 public class ItemRequestController {
 
+    private final ItemRequestService itemRequestService;
 
-
-/*    @PostMapping
+    @PostMapping
     public ItemRequestDto add(@RequestHeader("X-Sharer-User-Id") Long userId,
                               @Valid @RequestBody ItemRequestDto itemRequestDto) {
         return itemRequestService.addItem(itemRequestDto, userId);
@@ -41,6 +45,6 @@ public class ItemRequestController {
     public ItemRequestDto get(@RequestHeader("X-Sharer-User-Id") Long userId,
                               @PathVariable long requestId) {
         return itemRequestService.get(userId, requestId);
-    }*/
+    }
 
 }

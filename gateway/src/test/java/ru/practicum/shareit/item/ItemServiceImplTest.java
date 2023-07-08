@@ -22,10 +22,6 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.ItemMapper;
 import ru.practicum.shareit.item.model.ItemRepository;
 import ru.practicum.shareit.item.model.ItemServiceImpl;
-import ru.practicum.shareit.request.ItemRequest;
-import ru.practicum.shareit.request.RequestRepository;
-import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserRepository;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
