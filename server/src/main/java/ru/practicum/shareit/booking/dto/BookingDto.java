@@ -9,7 +9,6 @@ import ru.practicum.shareit.user.User;
 
 import javax.validation.constraints.Future;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Past;
 import java.time.LocalDateTime;
 
 /**
