@@ -17,7 +17,7 @@ public class RequestClient extends BaseClient {
     private static final String API_PREFIX = "/requests";
 
     @Autowired
-    public RequestClient(@Value("http://localhost:9090") String serverUrl, RestTemplateBuilder builder) {
+    public RequestClient(@Value("http://server:9090") String serverUrl, RestTemplateBuilder builder) {
         super(
                 builder
                         .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
