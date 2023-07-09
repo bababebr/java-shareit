@@ -11,7 +11,7 @@ services:
        - POSTGRES_PASSWORD=postgres
        - TZ=EUROPE/MOSCOW
   server:
-    build: ./server
+    build: .
     image: shareit-server
     container_name: server
     environment:
@@ -20,9 +20,10 @@ services:
       - "9090:9090"
     depends_on:
       - db
+    tty: true
 
   gateway:
-    build: ./gateway
+    build: .
     image: shareit-gateway
     container_name: gateway
     depends_on:
