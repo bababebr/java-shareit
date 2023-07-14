@@ -19,7 +19,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class BookingServiceImpl implements BookingService {
 
     private final ItemRepository itemRepository;
@@ -27,7 +27,6 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
 
     @Override
-    @Transactional
     public BookingDto add(Long bookerId, BookingDto bookingDto) {
         Item item = itemRepository.findById(bookingDto.getItemId()).orElseThrow(() ->
                 new NoSuchObjectException(String.format("Item with ID=%s not found", bookingDto.getItemId())));
@@ -58,7 +57,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public BookingDto get(Long bookingId, Long userId) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
                 new NoSuchObjectException("Booking not found"));
@@ -71,7 +70,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<BookingDto> get(Long userId) {
         userRepository.findById(userId).orElseThrow(()
                 -> new NoSuchObjectException(String.format("User with ID=%s not found", userId)));
@@ -79,7 +78,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<BookingDto> getAllUserBookings(Long userId, String status, int from, int size) {
         PageRequest pageRequest = PageRequest.of(from, size);
         userRepository.findById(userId).orElseThrow(()
@@ -126,7 +125,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<BookingDto> getAllOwnersBooking(Long userId, String state, int from, int size) {
         userRepository.findById(userId).orElseThrow(()
                 -> new NoSuchObjectException(String.format("User with ID=%s not found", userId)));
