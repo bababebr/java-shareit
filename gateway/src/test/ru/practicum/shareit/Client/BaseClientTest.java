@@ -13,6 +13,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import ru.practicum.shareit.user.User;
@@ -28,6 +29,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 @Transactional
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@ActiveProfiles("test")
 class BaseClientTest {
 
     @InjectMocks
