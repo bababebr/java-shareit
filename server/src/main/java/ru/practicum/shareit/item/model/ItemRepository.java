@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
-    @Query("select it from Item as it join it.owner as o where o.id =?1")
+    @Query("select it from Item as it join it.owner as o where o.id =?1 ORDER BY it.id ASC ")
     List<Item> findItemsByOwner(long ownerId);
 
     @Query("select it from Item as it where UPPER(it.name) like UPPER(concat('%',?1,'%')) " +

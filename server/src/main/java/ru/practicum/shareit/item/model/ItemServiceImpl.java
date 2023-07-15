@@ -79,14 +79,13 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional(readOnly = true)
     public ItemBookingHistoryDto getItem(long itemId, long userId) {
-        LocalDateTime requestTime = LocalDateTime.now();
         Item item = repository.findById(itemId).orElseThrow(() ->
                 new NoSuchObjectException(String.format("Item with ID=%s not found", itemId)));
         List<Booking> itemBookings = bookingRepository.findByItem_IdOrderByStartDesc(itemId);
         List<Comment> itemComments = commentRepository.findAllByItemId(itemId);
         ItemBookingHistoryDto itemBookingHistoryDto = ItemMapper.itemBookingHistoryDto(item);
         if (item.getOwner().getId() == userId) {
-            setBookings(itemBookingHistoryDto, itemBookings, item.getOwner(), requestTime);
+            setBookings(itemBookingHistoryDto, itemBookings, item.getOwner(), LocalDateTime.now());
         }
         setComments(itemBookingHistoryDto, itemComments);
 
@@ -128,7 +127,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private void setBookings(ItemBookingHistoryDto item, List<Booking> bookings, User owner, LocalDateTime r) {
-        System.out.println(r + " - requset time");
+        System.out.println(r + " - requset time; itemID - " + item.getId() + " ownerId - " + owner.getId());
         System.out.println("//////////////////////////////");
         System.out.println("//////////////////////////////");
         System.out.println("//////////////////////////////");
@@ -156,13 +155,10 @@ public class ItemServiceImpl implements ItemService {
                     booking.getState() != BookingStatus.REJECTED) {
                 System.out.println(booking.getId() + " is owned by " + owner.getId() + " and status OK");
                 //Find Last Booking
-                if (booking.getStart().isAfter(r) && booking.getEnd().isAfter(r)) {
-                    System.out.println(booking.getId() + " start date is after " + r + " - passed");
-                    item.setLastBooking(null);
-                } else {
+                if (booking.getStart().isBefore(r) && (booking.getEnd().isBefore(r) || booking.getEnd().isAfter(r))) {
                     System.out.println(booking.getId() + " start date is before " + r + " - Yes, last booking");
                     item.setLastBooking(BookingMapper.bookingToBookingShort(booking));
-                    continue;
+                    break;
                 }
             }
         }
