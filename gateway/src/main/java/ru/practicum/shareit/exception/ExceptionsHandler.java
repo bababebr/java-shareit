@@ -11,16 +11,10 @@ import javax.validation.ValidationException;
 @RestControllerAdvice
 public class ExceptionsHandler {
 
-    @ExceptionHandler({ValidationException.class, ItemsAvailabilityException.class, CommentException.class})
+    @ExceptionHandler({ValidationException.class, ItemsAvailabilityException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse validationException(final RuntimeException e) {
         return new ErrorResponse("BadRequest Exception: ", e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse stateException(final StateException e) {
-        return new ErrorResponse("Unknown state: UNSUPPORTED_STATUS", e.getMessage());
     }
 
     @ExceptionHandler({EntityNotFoundException.class, NoSuchObjectException.class, NullPointerException.class})

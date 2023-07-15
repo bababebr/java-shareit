@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository repository;
@@ -77,15 +77,16 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public ItemBookingHistoryDto getItem(long itemId, long userId) {
+        LocalDateTime requestTime = LocalDateTime.now();
         Item item = repository.findById(itemId).orElseThrow(() ->
                 new NoSuchObjectException(String.format("Item with ID=%s not found", itemId)));
         List<Booking> itemBookings = bookingRepository.findByItem_IdOrderByStartDesc(itemId);
         List<Comment> itemComments = commentRepository.findAllByItemId(itemId);
         ItemBookingHistoryDto itemBookingHistoryDto = ItemMapper.itemBookingHistoryDto(item);
         if (item.getOwner().getId() == userId) {
-            setBookings(itemBookingHistoryDto, itemBookings, item.getOwner());
+            setBookings(itemBookingHistoryDto, itemBookings, item.getOwner(), requestTime);
         }
         setComments(itemBookingHistoryDto, itemComments);
 
@@ -93,14 +94,14 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ItemBookingHistoryDto> getUsersOwnItems(long ownerId) {
         List<Item> items = repository.findItemsByOwner(ownerId);
         return items.stream().map(i -> getItem(i.getId(), ownerId)).collect(Collectors.toList());
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ItemDto> searchItemByDescription(String searchText) {
         if (searchText.isBlank()) {
             return new ArrayList<>();
@@ -126,29 +127,47 @@ public class ItemServiceImpl implements ItemService {
         throw new CommentException(String.format("User with ID=?s didn't book item with ID=?s", userId, itemId));
     }
 
-    private void setBookings(ItemBookingHistoryDto item, List<Booking> bookings, User owner) {
+    private void setBookings(ItemBookingHistoryDto item, List<Booking> bookings, User owner, LocalDateTime r) {
+        System.out.println(r + " - requset time");
+        System.out.println("//////////////////////////////");
+        System.out.println("//////////////////////////////");
+        System.out.println("//////////////////////////////");
+        System.out.println("//////////////////////////////");
+        System.out.println("//////////////////////////////");
+        System.out.println("//////////////////////////////");
+        System.out.println("//////////////////////////////");
+        System.out.println("//////////////////////////////");
+        System.out.println("//////////////////////////////");
+
         for (Booking booking : bookings) {
             if (booking.getItem().getOwner().getId().longValue() == owner.getId().longValue() &&
                     booking.getState() != BookingStatus.REJECTED) {
+                System.out.println(booking.getId() + " is owned by " + owner.getId() + " and status OK");
                 //Find NextBooking
-                for (Booking b : bookings) {
-                    if (b.getStart().isBefore(LocalDateTime.now())) {
-                        break;
-                    }
-                    item.setNextBooking(BookingMapper.bookingToBookingShort(b));
+                if (booking.getStart().isBefore(r) && booking.getEnd().isAfter(r)) {
+                    System.out.println(booking.getId() + " start date is after " + r + " - Yes, next booking");
+                    item.setNextBooking(BookingMapper.bookingToBookingShort(booking));
                 }
+
                 //Find Last Booking
-                for (Booking b : bookings) {
-                    if (b.getStart().isAfter(LocalDateTime.now())) {
-                        continue;
-                    }
-                    item.setLastBooking(BookingMapper.bookingToBookingShort(b));
-                    if (b.getStart().isBefore(LocalDateTime.now())) {
-                        break;
-                    }
+                if (booking.getStart().isAfter(r) && booking.getEnd().isAfter(r)) {
+                    System.out.println(booking.getId() + " start date is after " + r + " - passed");
+                    item.setLastBooking(null);
                 }
+                System.out.println(booking.getId() + " start date is before " + r + " - Yes, last booking");
+                item.setLastBooking(BookingMapper.bookingToBookingShort(booking));
             }
         }
+        System.out.println("//////////////////////////////");
+        System.out.println("//////////////////////////////");
+        System.out.println("//////////////////////////////");
+        System.out.println("//////////////////////////////");
+        System.out.println("//////////////////////////////");
+        System.out.println("//////////////////////////////");
+        System.out.println("//////////////////////////////");
+        System.out.println("//////////////////////////////");
+        System.out.println("//////////////////////////////");
+
     }
 
     private void setComments(ItemBookingHistoryDto itemBookingHistoryDto, List<Comment> comments) {

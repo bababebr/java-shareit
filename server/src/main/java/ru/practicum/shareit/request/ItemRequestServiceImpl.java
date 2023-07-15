@@ -17,7 +17,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional()
 public class ItemRequestServiceImpl implements ItemRequestService {
 
     private final RequestRepository requestRepository;
@@ -33,6 +33,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ItemRequestDto> getUsersAll(Long userId, int from, int size) {
         userRepository.findById(userId).orElseThrow(() -> new NoSuchObjectException("User has not found."));
         List<ItemRequest> itemRequests = requestRepository.findAllByRequesterId(userId, PageRequest.of(from, size));
@@ -53,6 +54,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ItemRequestDto get(Long userId, long requestId) {
         userRepository.findById(userId).orElseThrow(() -> new NoSuchObjectException("User has not found."));
         ItemRequest itemRequest = requestRepository.findById(requestId).orElseThrow(() ->
@@ -65,6 +67,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ItemRequestDto> getOtherRequest(Long userId, int from, int size) {
         List<ItemRequest> itemRequests = requestRepository.findAllByRequesterIdIsNot(userId, PageRequest.of(from, size));
         List<ItemRequestDto> requestDtos = new ArrayList<>();
