@@ -144,18 +144,26 @@ public class ItemServiceImpl implements ItemService {
                     booking.getState() != BookingStatus.REJECTED) {
                 System.out.println(booking.getId() + " is owned by " + owner.getId() + " and status OK");
                 //Find NextBooking
-                if (booking.getStart().isBefore(r) && booking.getEnd().isAfter(r)) {
+                if (booking.getStart().isAfter(r) && booking.getEnd().isAfter(r)) {
                     System.out.println(booking.getId() + " start date is after " + r + " - Yes, next booking");
                     item.setNextBooking(BookingMapper.bookingToBookingShort(booking));
+                    continue;
                 }
-
+            }
+        }
+        for (Booking booking : bookings) {
+            if (booking.getItem().getOwner().getId().longValue() == owner.getId().longValue() &&
+                    booking.getState() != BookingStatus.REJECTED) {
+                System.out.println(booking.getId() + " is owned by " + owner.getId() + " and status OK");
                 //Find Last Booking
                 if (booking.getStart().isAfter(r) && booking.getEnd().isAfter(r)) {
                     System.out.println(booking.getId() + " start date is after " + r + " - passed");
                     item.setLastBooking(null);
+                } else {
+                    System.out.println(booking.getId() + " start date is before " + r + " - Yes, last booking");
+                    item.setLastBooking(BookingMapper.bookingToBookingShort(booking));
+                    continue;
                 }
-                System.out.println(booking.getId() + " start date is before " + r + " - Yes, last booking");
-                item.setLastBooking(BookingMapper.bookingToBookingShort(booking));
             }
         }
         System.out.println("//////////////////////////////");
@@ -167,8 +175,8 @@ public class ItemServiceImpl implements ItemService {
         System.out.println("//////////////////////////////");
         System.out.println("//////////////////////////////");
         System.out.println("//////////////////////////////");
-
     }
+
 
     private void setComments(ItemBookingHistoryDto itemBookingHistoryDto, List<Comment> comments) {
         for (Comment c : comments) {
