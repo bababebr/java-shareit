@@ -29,7 +29,7 @@ public class ItemController {
 
     @GetMapping("/{itemId}")
     public ResponseEntity<Object> get(@RequestHeader("X-Sharer-User-Id") long userId,
-                                     @PathVariable long itemId) {
+                                      @PathVariable long itemId) {
         return itemClient.getItems(userId, itemId);
     }
 
@@ -46,17 +46,8 @@ public class ItemController {
 
     @PostMapping("/{itemId}/comment")
     public ResponseEntity<Object> addComment(@RequestHeader("X-Sharer-User-Id") long userId,
-                                 @PathVariable Long itemId,
-                                 @Valid @RequestBody CommentDTO commentDTO) {
+                                             @PathVariable Long itemId,
+                                             @Valid @RequestBody CommentDTO commentDTO) {
         return itemClient.addComment(userId, itemId, commentDTO);
     }
-/*
-
-
-
-
-
-
-
-*/
 }
