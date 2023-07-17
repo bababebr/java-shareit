@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -11,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.client.MockRestServiceServer;
+import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.user.User;
 
 import java.time.LocalDateTime;
 
@@ -34,13 +37,15 @@ class BookingClientTest {
     void add() {
         this.server.expect(requestTo("http://localhost:9090/bookings"))
                 .andRespond(withSuccess("", MediaType.APPLICATION_JSON));
-        BookingDto bookingDto = BookingDto.create(1L, 1L, 1L, 2L, LocalDateTime.now(),
+        User user = User.create(1L, "name", "email");
+        Item item = Item.create(1L, user, true, "", "", 1L);
+        BookingDto bookingDto = BookingDto.create(1L, 1L, item, user, LocalDateTime.now(),
                 LocalDateTime.now(), BookingStatus.WAITING);
         ResponseEntity<Object> response = bookingClient.add(1L, bookingDto);
         assertEquals(response.getStatusCode(), HttpStatus.OK);
     }
 
-/*    @Test
+    @Test
     void approve() throws JsonProcessingException {
         User user = User.create(1L, "name", "email");
         Item item = Item.create(1L, user, true, "", "", 1L);
@@ -87,5 +92,5 @@ class BookingClientTest {
                 .andRespond(withSuccess("true", MediaType.APPLICATION_JSON));
         ResponseEntity<Object> response = bookingClient.getAllOwnersBooking(1L, "ALL", 0, 10);
         assertEquals(response.getStatusCode(), HttpStatus.OK);
-    }*/
+    }
 }

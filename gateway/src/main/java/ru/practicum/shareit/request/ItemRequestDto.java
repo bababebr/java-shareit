@@ -3,7 +3,7 @@ package ru.practicum.shareit.request;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.shareit.item.Item;
+
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,5 +20,5 @@ public class ItemRequestDto {
     String description;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     LocalDateTime created;
-    List<Item> items = new ArrayList<>();
+    List<Long> items = new ArrayList<>();
 }

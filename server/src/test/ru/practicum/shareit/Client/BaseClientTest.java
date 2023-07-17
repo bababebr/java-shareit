@@ -1,16 +1,30 @@
 package ru.practicum.shareit.client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import ru.practicum.shareit.config.client.BaseClient;
+import ru.practicum.shareit.user.User;
 
 import javax.transaction.Transactional;
+import java.util.HashMap;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 
 @Transactional
 @SpringBootTest
@@ -24,7 +38,7 @@ class BaseClientTest {
     RestTemplate restTemplate;
     ObjectMapper mapper = new ObjectMapper();
 
-/*    @Test
+    @Test
     void get() throws JsonProcessingException {
         HashMap<String, Object> param = new HashMap<>();
         User user = User.create(1L, "name", "email");
@@ -162,6 +176,6 @@ class BaseClientTest {
         User responseUser = mapper.readValue(o.getBody().toString(), User.class);
         assertEquals(o.getStatusCode(), HttpStatus.NOT_FOUND);
 
-    }*/
+    }
 
 }

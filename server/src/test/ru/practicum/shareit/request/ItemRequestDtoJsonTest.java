@@ -1,18 +1,28 @@
 package ru.practicum.shareit.request;
 
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
+import org.springframework.boot.test.json.JsonContent;
+import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.request.ItemRequestDto;
+import ru.practicum.shareit.user.User;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @JsonTest
 public class ItemRequestDtoJsonTest {
     @Autowired
     private JacksonTester<ItemRequestDto> json;
 
-
-/*
-            @Test
-        void create() throws IOException {
+    @Test
+    void create() throws IOException {
         LocalDateTime created =  LocalDateTime.now();
         User user1 = User.create(1L, "user 1", "email1");
         User user2 = User.create(2L, "user 2", "email2");
@@ -26,5 +36,5 @@ public class ItemRequestDtoJsonTest {
         assertThat(result).extractingJsonPathStringValue("$.description").isEqualTo("desc");
         assertThat(result).extractingJsonPathStringValue("$.created")
                 .isEqualTo(created.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
-    }*/
+    }
 }

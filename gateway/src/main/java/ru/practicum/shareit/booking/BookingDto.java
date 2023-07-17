@@ -3,8 +3,6 @@ package ru.practicum.shareit.booking;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.shareit.item.Item;
-import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.validation.annotation.BookingValidation;
 
 import javax.validation.constraints.Future;
@@ -24,8 +22,8 @@ import java.time.LocalDateTime;
 public class BookingDto {
     Long id;
     Long itemId;
-    Item item;
-    User booker;
+    Long item;
+    Long booker;
     @NotNull
     @Future
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
