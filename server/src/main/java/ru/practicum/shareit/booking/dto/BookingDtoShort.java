@@ -6,15 +6,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-import javax.validation.constraints.NotNull;
-
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor(staticName = "create")
 public class BookingDtoShort {
-    @NotNull
     Long id;
-    @NotNull
     Long bookerId;
 }

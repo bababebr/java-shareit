@@ -5,8 +5,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Min;
 import java.util.List;
 
 @RestController
@@ -19,7 +17,7 @@ public class BookingController {
 
     @PostMapping
     public BookingDto add(@RequestHeader("X-Sharer-User-Id") Long bookerId,
-                          @Valid @RequestBody BookingDto booking) {
+                          @RequestBody BookingDto booking) {
         return bookingService.add(bookerId, booking);
     }
 
@@ -39,16 +37,16 @@ public class BookingController {
     @GetMapping
     public List<BookingDto> getUserBookings(@RequestHeader("X-Sharer-User-Id") Long userId,
                                             @RequestParam(defaultValue = "ALL") String state,
-                                            @RequestParam(defaultValue = "0") @Min(0)  int from,
-                                            @RequestParam(defaultValue = "10") @Min(1) int size) {
+                                            @RequestParam(defaultValue = "0") int from,
+                                            @RequestParam(defaultValue = "10") int size) {
         return bookingService.getAllUserBookings(userId, state, from, size);
     }
 
     @GetMapping("/owner")
     public List<BookingDto> getOwnerBookings(@RequestHeader("X-Sharer-User-Id") Long userId,
                                              @RequestParam(defaultValue = "ALL") String state,
-                                             @RequestParam (defaultValue = "0") @Min(0) int from,
-                                             @RequestParam(defaultValue = "10") @Min(1) int size) {
+                                             @RequestParam(defaultValue = "0") int from,
+                                             @RequestParam(defaultValue = "10") int size) {
         return bookingService.getAllOwnersBooking(userId, state, from, size);
     }
 }

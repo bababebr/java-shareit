@@ -7,8 +7,6 @@ import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
 
-import javax.validation.constraints.Future;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 /**
@@ -25,14 +23,10 @@ public class BookingDto {
     Long itemId;
     Item item;
     User booker;
-    @NotNull
-    @Future
+
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     LocalDateTime start;
-    @Future
-    @NotNull
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     LocalDateTime end;
-    @NotNull
     BookingStatus status = BookingStatus.WAITING;
 }
