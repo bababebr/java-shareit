@@ -2,7 +2,6 @@ package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,7 +11,7 @@ import javax.validation.constraints.Min;
 /**
  * TODO Sprint add-item-requests.
  */
-@Controller
+@RestController
 @RequestMapping(path = "/requests")
 @RequiredArgsConstructor
 @Validated
